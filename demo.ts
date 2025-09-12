@@ -7,7 +7,7 @@
 import chalk from 'chalk';
 import { SchemaDiff } from './src/utils/diff.js';
 import { schema as exampleSchema } from './src/schema/example.js';
-import { schema as looplensSchema } from './schema/looplens.schema.js';
+import { schema as exampleSchema2 } from './schema/example.schema.js';
 
 console.log(chalk.blue('🚀 PocketVex Schema Migration System Demo\n'));
 
@@ -15,19 +15,23 @@ console.log(chalk.blue('🚀 PocketVex Schema Migration System Demo\n'));
 console.log(chalk.yellow('📋 Demo 1: Schema Structure'));
 console.log(chalk.gray('Example schema contains:'));
 console.log(chalk.gray(`  - ${exampleSchema.collections.length} collections`));
-exampleSchema.collections.forEach(col => {
-  console.log(chalk.gray(`    • ${col.name} (${col.schema?.length || 0} fields)`));
+exampleSchema.collections.forEach((col) => {
+  console.log(
+    chalk.gray(`    • ${col.name} (${col.schema?.length || 0} fields)`),
+  );
 });
 
-console.log(chalk.gray('\nLoopLens schema contains:'));
-console.log(chalk.gray(`  - ${looplensSchema.collections.length} collections`));
-looplensSchema.collections.forEach(col => {
-  console.log(chalk.gray(`    • ${col.name} (${col.schema?.length || 0} fields)`));
+console.log(chalk.gray('\nExample schema 2 contains:'));
+console.log(chalk.gray(`  - ${exampleSchema2.collections.length} collections`));
+exampleSchema2.collections.forEach((col) => {
+  console.log(
+    chalk.gray(`    • ${col.name} (${col.schema?.length || 0} fields)`),
+  );
 });
 
 // Demo 2: Schema comparison
 console.log(chalk.yellow('\n📊 Demo 2: Schema Comparison'));
-const plan = SchemaDiff.buildDiffPlan(looplensSchema, exampleSchema);
+const plan = SchemaDiff.buildDiffPlan(exampleSchema2, exampleSchema);
 
 console.log(chalk.green(`Safe operations: ${plan.safe.length}`));
 plan.safe.forEach((op, index) => {
@@ -46,17 +50,19 @@ plan.unsafe.forEach((op, index) => {
 console.log(chalk.yellow('\n🔄 Demo 3: What Would Be Applied'));
 if (plan.safe.length > 0) {
   console.log(chalk.green('Safe changes would be applied automatically:'));
-  plan.safe.forEach(op => {
+  plan.safe.forEach((op) => {
     console.log(chalk.green(`  ✅ ${op.summary}`));
   });
 }
 
 if (plan.unsafe.length > 0) {
   console.log(chalk.yellow('\nUnsafe changes would generate migration files:'));
-  plan.unsafe.forEach(op => {
+  plan.unsafe.forEach((op) => {
     console.log(chalk.yellow(`  ⚠️  ${op.summary}`));
   });
-  console.log(chalk.gray('\n💡 Run "bun run migrate generate" to create migration files'));
+  console.log(
+    chalk.gray('\n💡 Run "bun run migrate generate" to create migration files'),
+  );
 }
 
 // Demo 4: Show usage examples

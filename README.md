@@ -56,29 +56,34 @@ import type { SchemaDefinition } from '../src/types/schema.js';
 export const schema: SchemaDefinition = {
   collections: [
     {
-      id: "users_001",
-      name: "users",
-      type: "base",
+      id: 'users_001',
+      name: 'users',
+      type: 'base',
       schema: [
-        { name: "name", type: "text", required: true },
-        { name: "email", type: "email", required: true, unique: true },
-        { name: "role", type: "select", options: { values: ["user", "admin"] } }
+        { name: 'name', type: 'text', required: true },
+        { name: 'email', type: 'email', required: true, unique: true },
+        {
+          name: 'role',
+          type: 'select',
+          options: { values: ['user', 'admin'] },
+        },
       ],
       rules: {
         list: "@request.auth.id != ''",
         view: "@request.auth.id != ''",
         create: "@request.auth.id != ''",
-        update: "@request.auth.id = id",
-        delete: "@request.auth.role = 'admin'"
-      }
-    }
-  ]
+        update: '@request.auth.id = id',
+        delete: "@request.auth.role = 'admin'",
+      },
+    },
+  ],
 };
 ```
 
 ### 3. Watch Changes Apply Automatically
 
 When you save schema files, PocketVex will:
+
 - ✅ Apply safe changes immediately (new collections, fields, rules)
 - ⚠️ Generate migration files for unsafe changes (type changes, deletions)
 - 📊 Show you exactly what changed
@@ -147,6 +152,7 @@ pocketvex/
 ## 🔄 How It Works
 
 ### Safe Operations (Auto-applied)
+
 - ✅ Create new collections
 - ✅ Add new fields
 - ✅ Update collection rules
@@ -155,6 +161,7 @@ pocketvex/
 - ✅ Add select values
 
 ### Unsafe Operations (Generate Migrations)
+
 - ❌ Change field types
 - ❌ Delete collections/fields
 - ❌ Make fields required without defaults
@@ -177,20 +184,31 @@ interface SchemaDefinition {
 }
 
 interface SchemaCollection {
-  id?: string;                    // Stable ID for relations
-  name: string;                   // Collection name
-  type?: 'base' | 'auth';         // Collection type
-  schema?: SchemaField[];         // Field definitions
-  indexes?: string[];             // SQL indexes
-  rules?: SchemaRules;            // Access rules
+  id?: string; // Stable ID for relations
+  name: string; // Collection name
+  type?: 'base' | 'auth'; // Collection type
+  schema?: SchemaField[]; // Field definitions
+  indexes?: string[]; // SQL indexes
+  rules?: SchemaRules; // Access rules
 }
 
 interface SchemaField {
-  name: string;                   // Field name
-  type: 'text' | 'number' | 'bool' | 'email' | 'url' | 'date' | 'select' | 'json' | 'file' | 'relation';
-  required?: boolean;             // Required field
-  unique?: boolean;               // Unique constraint
-  options?: {                     // Field-specific options
+  name: string; // Field name
+  type:
+    | 'text'
+    | 'number'
+    | 'bool'
+    | 'email'
+    | 'url'
+    | 'date'
+    | 'select'
+    | 'json'
+    | 'file'
+    | 'relation';
+  required?: boolean; // Required field
+  unique?: boolean; // Unique constraint
+  options?: {
+    // Field-specific options
     min?: number;
     max?: number;
     pattern?: string;
@@ -214,7 +232,7 @@ import { mySchema } from './schema/my-app.schema.js';
 // Use in dev server
 const config = {
   // ... other config
-  schemaLoader: () => mySchema
+  schemaLoader: () => mySchema,
 };
 ```
 
@@ -225,7 +243,7 @@ const config = {
 export const up = async (pb) => {
   // Backup data before destructive changes
   const backup = await backupData(pb, 'users');
-  
+
   // Migrate field data
   await migrateFieldData(pb, 'users', 'email', (email) => {
     return email.toLowerCase();

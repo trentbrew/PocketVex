@@ -1,9 +1,9 @@
 /**
- * Example schema definition for a course management system
- * This demonstrates the schema-as-code approach
+ * Example Course Management Schema
+ * Example schema for a course management system
  */
 
-import type { SchemaDefinition } from '../types/schema.js';
+import type { SchemaDefinition } from '../src/types/schema.js';
 
 export const schema: SchemaDefinition = {
   collections: [
@@ -129,60 +129,6 @@ export const schema: SchemaDefinition = {
           name: 'order',
           type: 'number',
           required: true,
-        },
-        {
-          name: 'isPublished',
-          type: 'bool',
-          options: {},
-        },
-      ],
-    },
-    {
-      id: 'les01lplens001x',
-      name: 'lessons',
-      type: 'base',
-      indexes: [
-        'CREATE INDEX idx_lessons_module ON lessons (module)',
-        'CREATE INDEX idx_lessons_order ON lessons (module, order)',
-      ],
-      rules: {
-        list: "@request.auth.id != ''",
-        view: "@request.auth.id != ''",
-        create: "@request.auth.role ?~ '(instructor|admin)'",
-        update: "@request.auth.role ?~ '(instructor|admin)'",
-        delete: "@request.auth.role = 'admin'",
-      },
-      schema: [
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
-          options: { min: 1, max: 200 },
-        },
-        {
-          name: 'content',
-          type: 'text',
-          options: { max: 50000 },
-        },
-        {
-          name: 'module',
-          type: 'relation',
-          required: true,
-          options: {
-            collectionId: 'mod01lplens001x',
-            maxSelect: 1,
-            cascadeDelete: true,
-          },
-        },
-        {
-          name: 'order',
-          type: 'number',
-          required: true,
-        },
-        {
-          name: 'duration',
-          type: 'number',
-          options: { min: 0 },
         },
         {
           name: 'isPublished',

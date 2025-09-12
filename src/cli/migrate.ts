@@ -26,21 +26,25 @@ program
 program
   .command('generate')
   .description('Generate a new migration file from schema changes')
-  .option('-o, --output <path>', 'Output directory for migrations', './pb_migrations')
+  .option(
+    '-o, --output <path>',
+    'Output directory for migrations',
+    './pb_migrations',
+  )
   .option('-n, --name <name>', 'Migration name', 'auto-generated')
   .action(async (options) => {
     const spinner = ora('Generating migration...').start();
-    
+
     try {
       const config = {
         url: process.env.PB_URL || 'http://127.0.0.1:8090',
         adminEmail: process.env.PB_ADMIN_EMAIL || 'admin@example.com',
-        adminPassword: process.env.PB_ADMIN_PASS || 'admin123'
+        adminPassword: process.env.PB_ADMIN_PASS || 'admin123',
       };
 
       const pbClient = new PocketBaseClient(config);
       await pbClient.authenticate();
-      
+
       const currentSchema = await pbClient.fetchCurrentSchema();
       const plan = SchemaDiff.buildDiffPlan(exampleSchema, currentSchema);
 
@@ -57,18 +61,19 @@ program
       await writeFile(filepath, migrationContent);
 
       spinner.succeed(`Generated migration: ${filepath}`);
-      
+
       console.log(chalk.green(`\n📊 Migration Summary:`));
       console.log(chalk.green(`  Safe operations: ${plan.safe.length}`));
       console.log(chalk.red(`  Unsafe operations: ${plan.unsafe.length}`));
-      
+
       if (plan.unsafe.length > 0) {
-        console.log(chalk.yellow(`\n⚠️  Unsafe operations require manual review:`));
-        plan.unsafe.forEach(op => {
+        console.log(
+          chalk.yellow(`\n⚠️  Unsafe operations require manual review:`),
+        );
+        plan.unsafe.forEach((op) => {
           console.log(chalk.red(`  - ${op.summary}`));
         });
       }
-
     } catch (error) {
       spinner.fail('Failed to generate migration');
       console.error(chalk.red('Error:'), error);
@@ -86,10 +91,10 @@ program
   .option('--dry-run', 'Show what would be executed without running')
   .action(async (options) => {
     const spinner = ora('Loading migrations...').start();
-    
+
     try {
       const migrations = await loadMigrations(options.dir);
-      
+
       if (migrations.length === 0) {
         spinner.succeed('No migrations found');
         return;
@@ -99,7 +104,7 @@ program
 
       if (options.dryRun) {
         console.log(chalk.yellow('\n🔍 Dry run - would execute:'));
-        migrations.forEach(migration => {
+        migrations.forEach((migration) => {
           console.log(chalk.gray(`  - ${migration.name}`));
         });
         return;
@@ -108,7 +113,7 @@ program
       const config = {
         url: process.env.PB_URL || 'http://127.0.0.1:8090',
         adminEmail: process.env.PB_ADMIN_EMAIL || 'admin@example.com',
-        adminPassword: process.env.PB_ADMIN_PASS || 'admin123'
+        adminPassword: process.env.PB_ADMIN_PASS || 'admin123',
       };
 
       const pbClient = new PocketBaseClient(config);
@@ -116,7 +121,7 @@ program
 
       for (const migration of migrations) {
         const migrationSpinner = ora(`Running ${migration.name}...`).start();
-        
+
         try {
           await migration.up(pbClient.pb);
           migrationSpinner.succeed(`Completed ${migration.name}`);
@@ -128,7 +133,6 @@ program
       }
 
       console.log(chalk.green('\n✅ All migrations completed successfully'));
-
     } catch (error) {
       spinner.fail('Failed to run migrations');
       console.error(chalk.red('Error:'), error);
@@ -146,10 +150,10 @@ program
   .option('--dry-run', 'Show what would be rolled back without running')
   .action(async (options) => {
     const spinner = ora('Loading migrations...').start();
-    
+
     try {
       const migrations = await loadMigrations(options.dir);
-      
+
       if (migrations.length === 0) {
         spinner.succeed('No migrations found');
         return;
@@ -171,14 +175,16 @@ program
       const config = {
         url: process.env.PB_URL || 'http://127.0.0.1:8090',
         adminEmail: process.env.PB_ADMIN_EMAIL || 'admin@example.com',
-        adminPassword: process.env.PB_ADMIN_PASS || 'admin123'
+        adminPassword: process.env.PB_ADMIN_PASS || 'admin123',
       };
 
       const pbClient = new PocketBaseClient(config);
       await pbClient.authenticate();
 
-      const migrationSpinner = ora(`Rolling back ${lastMigration.name}...`).start();
-      
+      const migrationSpinner = ora(
+        `Rolling back ${lastMigration.name}...`,
+      ).start();
+
       try {
         await lastMigration.down(pbClient.pb);
         migrationSpinner.succeed(`Rolled back ${lastMigration.name}`);
@@ -189,7 +195,6 @@ program
       }
 
       console.log(chalk.green('\n✅ Migration rolled back successfully'));
-
     } catch (error) {
       spinner.fail('Failed to rollback migration');
       console.error(chalk.red('Error:'), error);
@@ -206,10 +211,10 @@ program
   .option('-d, --dir <path>', 'Migrations directory', './pb_migrations')
   .action(async (options) => {
     const spinner = ora('Loading migrations...').start();
-    
+
     try {
       const migrations = await loadMigrations(options.dir);
-      
+
       if (migrations.length === 0) {
         spinner.succeed('No migrations found');
         return;
@@ -220,9 +225,10 @@ program
       console.log(chalk.blue('\n📋 Migration Status:'));
       migrations.forEach((migration, index) => {
         const status = chalk.green('✅ Ready');
-        console.log(chalk.gray(`  ${index + 1}. ${migration.name} - ${status}`));
+        console.log(
+          chalk.gray(`  ${index + 1}. ${migration.name} - ${status}`),
+        );
       });
-
     } catch (error) {
       spinner.fail('Failed to load migrations');
       console.error(chalk.red('Error:'), error);
@@ -236,24 +242,22 @@ program
 async function loadMigrations(dir: string) {
   try {
     const files = await readdir(dir);
-    const migrationFiles = files
-      .filter(file => file.endsWith('.js'))
-      .sort();
+    const migrationFiles = files.filter((file) => file.endsWith('.js')).sort();
 
     const migrations = [];
-    
+
     for (const file of migrationFiles) {
       const filepath = join(dir, file);
       const content = await readFile(filepath, 'utf-8');
-      
+
       // Extract migration functions using dynamic import
       const module = await import(filepath);
-      
+
       if (module.up && module.down) {
         migrations.push({
           name: file.replace('.js', ''),
           up: module.up,
-          down: module.down
+          down: module.down,
         });
       }
     }
@@ -267,13 +271,16 @@ async function loadMigrations(dir: string) {
 /**
  * Generate migration file content
  */
-function generateMigrationContent(plan: { safe: any[]; unsafe: any[] }, name: string): string {
+function generateMigrationContent(
+  plan: { safe: any[]; unsafe: any[] },
+  name: string,
+): string {
   const timestamp = new Date().toISOString();
-  
+
   return `/**
  * Generated migration: ${name}
  * Created: ${timestamp}
- * 
+ *
  * Safe operations: ${plan.safe.length}
  * Unsafe operations: ${plan.unsafe.length}
  */
@@ -282,20 +289,20 @@ import PocketBase from 'pocketbase';
 
 export const up = async (pb) => {
   console.log('Running migration: ${name}');
-  
+
   // Safe operations
-${plan.safe.map(op => `  // ${op.summary}`).join('\n')}
-  
+${plan.safe.map((op) => `  // ${op.summary}`).join('\n')}
+
   // Unsafe operations (require manual implementation)
-${plan.unsafe.map(op => `  // ${op.summary}`).join('\n')}
-  
+${plan.unsafe.map((op) => `  // ${op.summary}`).join('\n')}
+
   // TODO: Implement the actual migration logic
   console.log('Migration completed: ${name}');
 };
 
 export const down = async (pb) => {
   console.log('Rolling back migration: ${name}');
-  
+
   // TODO: Implement rollback logic
   console.log('Rollback completed: ${name}');
 };
@@ -308,14 +315,14 @@ const backupData = async (pb, collectionName) => {
     timestamp: new Date().toISOString(),
     records: records
   };
-  
+
   console.log(\`Backed up \${records.length} records from \${collectionName}\`);
   return backup;
 };
 
 const migrateFieldData = async (pb, collectionName, fieldName, transformer) => {
   const records = await pb.collection(collectionName).getFullList();
-  
+
   for (const record of records) {
     if (record[fieldName] !== undefined) {
       const newValue = transformer(record[fieldName]);
@@ -324,7 +331,7 @@ const migrateFieldData = async (pb, collectionName, fieldName, transformer) => {
       });
     }
   }
-  
+
   console.log(\`Migrated \${records.length} records in \${collectionName}.\${fieldName}\`);
 };
 `;

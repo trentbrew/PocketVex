@@ -37,7 +37,13 @@
   "bin": {
     "pocketvex": "./dist/index.js"
   },
-  "keywords": ["pocketbase", "schema", "migration", "database", "development"],
+  "keywords": [
+    "pocketbase",
+    "schema",
+    "migration",
+    "database",
+    "development"
+  ],
   "author": "Trent Brew",
   "license": "MIT"
 }

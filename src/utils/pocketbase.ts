@@ -4,11 +4,11 @@
  */
 
 import PocketBase from 'pocketbase';
-import type { 
-  SchemaDefinition, 
-  SchemaCollection, 
-  MigrationOperation, 
-  PocketBaseConfig 
+import type {
+  SchemaDefinition,
+  SchemaCollection,
+  MigrationOperation,
+  PocketBaseConfig,
 } from '../types/schema.js';
 
 export class PocketBaseClient {
@@ -27,7 +27,7 @@ export class PocketBaseClient {
     try {
       await this.pb.admins.authWithPassword(
         this.config.adminEmail,
-        this.config.adminPassword
+        this.config.adminPassword,
       );
     } catch (error) {
       throw new Error(`Failed to authenticate with PocketBase: ${error}`);
@@ -40,30 +40,31 @@ export class PocketBaseClient {
   async fetchCurrentSchema(): Promise<SchemaDefinition> {
     try {
       const collections = await this.pb.collections.getFullList();
-      
+
       return {
         collections: collections.map((col: any) => ({
           id: col.id,
           name: col.name,
           type: col.type,
           system: col.system,
-          schema: col.schema?.map((field: any) => ({
-            id: field.id,
-            name: field.name,
-            type: field.type,
-            required: field.required,
-            unique: field.unique,
-            options: field.options || {}
-          })) || [],
+          schema:
+            col.schema?.map((field: any) => ({
+              id: field.id,
+              name: field.name,
+              type: field.type,
+              required: field.required,
+              unique: field.unique,
+              options: field.options || {},
+            })) || [],
           indexes: col.indexes || [],
           rules: {
             list: col.listRule,
             view: col.viewRule,
             create: col.createRule,
             update: col.updateRule,
-            delete: col.deleteRule
-          }
-        }))
+            delete: col.deleteRule,
+          },
+        })),
       };
     } catch (error) {
       throw new Error(`Failed to fetch current schema: ${error}`);
@@ -89,7 +90,11 @@ export class PocketBaseClient {
           await this.addField(operation.collection!, operation.payload);
           break;
         case 'updateField':
-          await this.updateField(operation.collection!, operation.field!, operation.payload);
+          await this.updateField(
+            operation.collection!,
+            operation.field!,
+            operation.payload,
+          );
           break;
         case 'deleteField':
           await this.deleteField(operation.collection!, operation.field!);
@@ -107,7 +112,9 @@ export class PocketBaseClient {
           throw new Error(`Unknown operation type: ${operation.kind}`);
       }
     } catch (error) {
-      throw new Error(`Failed to apply operation '${operation.summary}': ${error}`);
+      throw new Error(
+        `Failed to apply operation '${operation.summary}': ${error}`,
+      );
     }
   }
 
@@ -126,7 +133,7 @@ export class PocketBaseClient {
       viewRule: collection.rules?.view || null,
       createRule: collection.rules?.create || null,
       updateRule: collection.rules?.update || null,
-      deleteRule: collection.rules?.delete || null
+      deleteRule: collection.rules?.delete || null,
     });
   }
 
@@ -135,7 +142,7 @@ export class PocketBaseClient {
    */
   private async updateCollection(collection: SchemaCollection): Promise<void> {
     const existing = await this.pb.collections.getOne(collection.id!);
-    
+
     await this.pb.collections.update(collection.id!, {
       ...existing,
       name: collection.name,
@@ -147,7 +154,7 @@ export class PocketBaseClient {
       viewRule: collection.rules?.view || null,
       createRule: collection.rules?.create || null,
       updateRule: collection.rules?.update || null,
-      deleteRule: collection.rules?.delete || null
+      deleteRule: collection.rules?.delete || null,
     });
   }
 
@@ -170,24 +177,40 @@ export class PocketBaseClient {
   /**
    * Update a field in a collection
    */
-  private async updateField(collectionName: string, fieldName: string, payload: any): Promise<void> {
+  private async updateField(
+    collectionName: string,
+    fieldName: string,
+    payload: any,
+  ): Promise<void> {
     const collection = await this.pb.collections.getOne(collectionName);
-    const fieldIndex = collection.schema.findIndex((f: any) => f.name === fieldName);
-    
+    const fieldIndex = collection.schema.findIndex(
+      (f: any) => f.name === fieldName,
+    );
+
     if (fieldIndex === -1) {
-      throw new Error(`Field '${fieldName}' not found in collection '${collectionName}'`);
+      throw new Error(
+        `Field '${fieldName}' not found in collection '${collectionName}'`,
+      );
     }
 
-    collection.schema[fieldIndex] = { ...collection.schema[fieldIndex], ...payload.desired };
+    collection.schema[fieldIndex] = {
+      ...collection.schema[fieldIndex],
+      ...payload.desired,
+    };
     await this.pb.collections.update(collection.id, collection);
   }
 
   /**
    * Delete a field from a collection
    */
-  private async deleteField(collectionName: string, fieldName: string): Promise<void> {
+  private async deleteField(
+    collectionName: string,
+    fieldName: string,
+  ): Promise<void> {
     const collection = await this.pb.collections.getOne(collectionName);
-    collection.schema = collection.schema.filter((f: any) => f.name !== fieldName);
+    collection.schema = collection.schema.filter(
+      (f: any) => f.name !== fieldName,
+    );
     await this.pb.collections.update(collection.id, collection);
   }
 
@@ -204,10 +227,15 @@ export class PocketBaseClient {
   /**
    * Delete an index from a collection
    */
-  private async deleteIndex(collectionName: string, index: string): Promise<void> {
+  private async deleteIndex(
+    collectionName: string,
+    index: string,
+  ): Promise<void> {
     const collection = await this.pb.collections.getOne(collectionName);
     if (collection.indexes) {
-      collection.indexes = collection.indexes.filter((i: string) => i !== index);
+      collection.indexes = collection.indexes.filter(
+        (i: string) => i !== index,
+      );
       await this.pb.collections.update(collection.id, collection);
     }
   }
@@ -217,14 +245,14 @@ export class PocketBaseClient {
    */
   private async updateRules(collectionName: string, rules: any): Promise<void> {
     const collection = await this.pb.collections.getOne(collectionName);
-    
+
     await this.pb.collections.update(collection.id, {
       ...collection,
       listRule: rules.list || null,
       viewRule: rules.view || null,
       createRule: rules.create || null,
       updateRule: rules.update || null,
-      deleteRule: rules.delete || null
+      deleteRule: rules.delete || null,
     });
   }
 

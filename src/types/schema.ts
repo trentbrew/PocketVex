@@ -6,7 +6,17 @@
 export interface SchemaField {
   id?: string;
   name: string;
-  type: 'text' | 'number' | 'bool' | 'email' | 'url' | 'date' | 'select' | 'json' | 'file' | 'relation';
+  type:
+    | 'text'
+    | 'number'
+    | 'bool'
+    | 'email'
+    | 'url'
+    | 'date'
+    | 'select'
+    | 'json'
+    | 'file'
+    | 'relation';
   required?: boolean;
   unique?: boolean;
   options?: {
@@ -50,9 +60,18 @@ export interface MigrationPlan {
 }
 
 export interface MigrationOperation {
-  kind: 'createCollection' | 'updateCollection' | 'deleteCollection' | 
-        'addField' | 'updateField' | 'deleteField' | 'renameField' |
-        'addIndex' | 'deleteIndex' | 'updateRules' | 'typeChange';
+  kind:
+    | 'createCollection'
+    | 'updateCollection'
+    | 'deleteCollection'
+    | 'addField'
+    | 'updateField'
+    | 'deleteField'
+    | 'renameField'
+    | 'addIndex'
+    | 'deleteIndex'
+    | 'updateRules'
+    | 'typeChange';
   summary: string;
   collection?: string;
   field?: string;

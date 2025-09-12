@@ -3,19 +3,22 @@
  * Determines safe vs unsafe operations for migration planning
  */
 
-import type { 
-  SchemaDefinition, 
-  SchemaCollection, 
-  SchemaField, 
-  MigrationPlan, 
-  MigrationOperation 
+import type {
+  SchemaDefinition,
+  SchemaCollection,
+  SchemaField,
+  MigrationPlan,
+  MigrationOperation,
 } from '../types/schema.js';
 
 export class SchemaDiff {
   /**
    * Compare desired schema against current PocketBase schema
    */
-  static buildDiffPlan(desired: SchemaDefinition, current: SchemaDefinition): MigrationPlan {
+  static buildDiffPlan(
+    desired: SchemaDefinition,
+    current: SchemaDefinition,
+  ): MigrationPlan {
     const safe: MigrationOperation[] = [];
     const unsafe: MigrationOperation[] = [];
 
@@ -26,7 +29,7 @@ export class SchemaDiff {
     // Find collections to create, update, or delete
     const allCollectionNames = new Set([
       ...Object.keys(desiredByName),
-      ...Object.keys(currentByName)
+      ...Object.keys(currentByName),
     ]);
 
     for (const name of allCollectionNames) {
@@ -39,7 +42,7 @@ export class SchemaDiff {
           kind: 'createCollection',
           summary: `Create collection '${name}'`,
           collection: name,
-          payload: desiredCol
+          payload: desiredCol,
         });
       } else if (currentCol && !desiredCol) {
         // Delete collection (unsafe - data loss)
@@ -48,7 +51,7 @@ export class SchemaDiff {
           summary: `Delete collection '${name}' (WARNING: data loss)`,
           collection: name,
           payload: currentCol,
-          requiresDataMigration: true
+          requiresDataMigration: true,
         });
       } else if (desiredCol && currentCol) {
         // Update existing collection
@@ -67,16 +70,28 @@ export class SchemaDiff {
     desired: SchemaCollection,
     current: SchemaCollection,
     safe: MigrationOperation[],
-    unsafe: MigrationOperation[]
+    unsafe: MigrationOperation[],
   ) {
     // Compare rules
     this.compareRules(name, desired.rules, current.rules, safe);
 
     // Compare indexes
-    this.compareIndexes(name, desired.indexes || [], current.indexes || [], safe, unsafe);
+    this.compareIndexes(
+      name,
+      desired.indexes || [],
+      current.indexes || [],
+      safe,
+      unsafe,
+    );
 
     // Compare fields
-    this.compareFields(name, desired.schema || [], current.schema || [], safe, unsafe);
+    this.compareFields(
+      name,
+      desired.schema || [],
+      current.schema || [],
+      safe,
+      unsafe,
+    );
   }
 
   /**
@@ -86,7 +101,7 @@ export class SchemaDiff {
     name: string,
     desired: any,
     current: any,
-    safe: MigrationOperation[]
+    safe: MigrationOperation[],
   ) {
     if (!desired) return;
 
@@ -108,7 +123,7 @@ export class SchemaDiff {
         kind: 'updateRules',
         summary: `Update rules for collection '${name}'`,
         collection: name,
-        payload: desired
+        payload: desired,
       });
     }
   }
@@ -121,7 +136,7 @@ export class SchemaDiff {
     desired: string[],
     current: string[],
     safe: MigrationOperation[],
-    unsafe: MigrationOperation[]
+    unsafe: MigrationOperation[],
   ) {
     const desiredIndexes = new Set(desired || []);
     const currentIndexes = new Set(current || []);
@@ -133,7 +148,7 @@ export class SchemaDiff {
           kind: 'addIndex',
           summary: `Add index to collection '${name}': ${index}`,
           collection: name,
-          payload: index
+          payload: index,
         });
       }
     }
@@ -145,7 +160,7 @@ export class SchemaDiff {
           kind: 'deleteIndex',
           summary: `Remove index from collection '${name}': ${index}`,
           collection: name,
-          payload: index
+          payload: index,
         });
       }
     }
@@ -159,14 +174,14 @@ export class SchemaDiff {
     desired: SchemaField[],
     current: SchemaField[],
     safe: MigrationOperation[],
-    unsafe: MigrationOperation[]
+    unsafe: MigrationOperation[],
   ) {
     const desiredFields = this.normalizeFieldsByName(desired || []);
     const currentFields = this.normalizeFieldsByName(current || []);
 
     const allFieldNames = new Set([
       ...Object.keys(desiredFields),
-      ...Object.keys(currentFields)
+      ...Object.keys(currentFields),
     ]);
 
     for (const fieldName of allFieldNames) {
@@ -180,7 +195,7 @@ export class SchemaDiff {
           summary: `Add field '${fieldName}' to collection '${name}'`,
           collection: name,
           field: fieldName,
-          payload: desiredField
+          payload: desiredField,
         });
       } else if (currentField && !desiredField) {
         // Remove field (unsafe - data loss)
@@ -190,11 +205,18 @@ export class SchemaDiff {
           collection: name,
           field: fieldName,
           payload: currentField,
-          requiresDataMigration: true
+          requiresDataMigration: true,
         });
       } else if (desiredField && currentField) {
         // Update existing field
-        this.compareField(name, fieldName, desiredField, currentField, safe, unsafe);
+        this.compareField(
+          name,
+          fieldName,
+          desiredField,
+          currentField,
+          safe,
+          unsafe,
+        );
       }
     }
   }
@@ -208,7 +230,7 @@ export class SchemaDiff {
     desired: SchemaField,
     current: SchemaField,
     safe: MigrationOperation[],
-    unsafe: MigrationOperation[]
+    unsafe: MigrationOperation[],
   ) {
     const changes: string[] = [];
     let isUnsafe = false;
@@ -242,10 +264,13 @@ export class SchemaDiff {
     }
 
     // Options changes
-    const optionChanges = this.compareFieldOptions(desired.options, current.options);
+    const optionChanges = this.compareFieldOptions(
+      desired.options,
+      current.options,
+    );
     if (optionChanges.length > 0) {
-      const hasUnsafeOptions = optionChanges.some(change => 
-        change.includes('tighten') || change.includes('reduce')
+      const hasUnsafeOptions = optionChanges.some(
+        (change) => change.includes('tighten') || change.includes('reduce'),
       );
       if (hasUnsafeOptions) {
         isUnsafe = true;
@@ -256,11 +281,13 @@ export class SchemaDiff {
     if (changes.length > 0) {
       const operation: MigrationOperation = {
         kind: isUnsafe ? 'typeChange' : 'updateField',
-        summary: `Update field '${fieldName}' in collection '${collectionName}': ${changes.join(', ')}`,
+        summary: `Update field '${fieldName}' in collection '${collectionName}': ${changes.join(
+          ', ',
+        )}`,
         collection: collectionName,
         field: fieldName,
         payload: { desired, current },
-        requiresDataMigration: isUnsafe
+        requiresDataMigration: isUnsafe,
       };
 
       if (isUnsafe) {
@@ -276,7 +303,7 @@ export class SchemaDiff {
    */
   private static compareFieldOptions(desired?: any, current?: any): string[] {
     const changes: string[] = [];
-    
+
     if (!desired && !current) return changes;
     if (!desired || !current) {
       changes.push('options: changed');
@@ -284,10 +311,18 @@ export class SchemaDiff {
     }
 
     // Check for tightening constraints (unsafe)
-    if (desired.min !== undefined && current.min !== undefined && desired.min > current.min) {
+    if (
+      desired.min !== undefined &&
+      current.min !== undefined &&
+      desired.min > current.min
+    ) {
       changes.push(`min: ${current.min} → ${desired.min} (tighten)`);
     }
-    if (desired.max !== undefined && current.max !== undefined && desired.max < current.max) {
+    if (
+      desired.max !== undefined &&
+      current.max !== undefined &&
+      desired.max < current.max
+    ) {
       changes.push(`max: ${current.max} → ${desired.max} (tighten)`);
     }
 
@@ -300,8 +335,8 @@ export class SchemaDiff {
     if (desired.values && current.values) {
       const desiredValues = new Set(desired.values);
       const currentValues = new Set(current.values);
-      
-      const removed = [...currentValues].filter(v => !desiredValues.has(v));
+
+      const removed = [...currentValues].filter((v) => !desiredValues.has(v));
       if (removed.length > 0) {
         changes.push(`select values: removed ${removed.join(', ')} (unsafe)`);
       }
@@ -313,18 +348,18 @@ export class SchemaDiff {
   /**
    * Normalize collections by name for easier comparison
    */
-  private static normalizeCollectionsByName(collections: SchemaCollection[]): Record<string, SchemaCollection> {
-    return Object.fromEntries(
-      collections.map(col => [col.name, col])
-    );
+  private static normalizeCollectionsByName(
+    collections: SchemaCollection[],
+  ): Record<string, SchemaCollection> {
+    return Object.fromEntries(collections.map((col) => [col.name, col]));
   }
 
   /**
    * Normalize fields by name for easier comparison
    */
-  private static normalizeFieldsByName(fields: SchemaField[]): Record<string, SchemaField> {
-    return Object.fromEntries(
-      fields.map(field => [field.name, field])
-    );
+  private static normalizeFieldsByName(
+    fields: SchemaField[],
+  ): Record<string, SchemaField> {
+    return Object.fromEntries(fields.map((field) => [field.name, field]));
   }
 }

@@ -30,11 +30,11 @@ class DevServer {
    */
   async start(): Promise<void> {
     console.log(chalk.blue('🚀 Starting PocketVex Dev Server...'));
-    
+
     // Test connection
     const spinner = ora('Testing PocketBase connection...').start();
     const isConnected = await this.pbClient.testConnection();
-    
+
     if (!isConnected) {
       spinner.fail('Failed to connect to PocketBase');
       console.log(chalk.red('Please check your PocketBase configuration:'));
@@ -42,7 +42,7 @@ class DevServer {
       console.log(chalk.gray(`  Admin Email: ${this.config.adminEmail}`));
       process.exit(1);
     }
-    
+
     spinner.succeed('Connected to PocketBase');
 
     // Initial schema sync
@@ -63,7 +63,7 @@ class DevServer {
     this.watcher = chokidar.watch(this.config.watchPaths, {
       ignored: /(^|[\/\\])\../, // ignore dotfiles
       persistent: true,
-      ignoreInitial: true
+      ignoreInitial: true,
     });
 
     this.watcher.on('change', (path) => {
@@ -82,7 +82,9 @@ class DevServer {
    */
   private async syncSchema(): Promise<void> {
     if (this.isProcessing) {
-      console.log(chalk.gray('⏳ Schema sync already in progress, skipping...'));
+      console.log(
+        chalk.gray('⏳ Schema sync already in progress, skipping...'),
+      );
       return;
     }
 
@@ -107,7 +109,7 @@ class DevServer {
       // Handle safe operations
       if (plan.safe.length > 0) {
         spinner.text = `Applying ${plan.safe.length} safe changes...`;
-        
+
         for (const operation of plan.safe) {
           await this.pbClient.applyOperation(operation);
           console.log(chalk.green(`  ✅ ${operation.summary}`));
@@ -117,9 +119,9 @@ class DevServer {
       // Handle unsafe operations
       if (plan.unsafe.length > 0) {
         spinner.warn(`Found ${plan.unsafe.length} unsafe changes`);
-        
+
         console.log(chalk.red('\n⚠️  Unsafe changes detected:'));
-        plan.unsafe.forEach(op => {
+        plan.unsafe.forEach((op) => {
           console.log(chalk.red(`  ❌ ${op.summary}`));
         });
 
@@ -134,7 +136,6 @@ class DevServer {
       if (plan.safe.length > 0) {
         spinner.succeed(`Applied ${plan.safe.length} safe changes`);
       }
-
     } catch (error) {
       spinner.fail('Schema sync failed');
       console.error(chalk.red('Error:'), error);
@@ -146,7 +147,9 @@ class DevServer {
   /**
    * Generate migration file for unsafe operations
    */
-  private async generateMigration(unsafeOps: MigrationOperation[]): Promise<void> {
+  private async generateMigration(
+    unsafeOps: MigrationOperation[],
+  ): Promise<void> {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `migration-${timestamp}.js`;
     const filepath = `${this.config.migrationPath}/${filename}`;
@@ -166,7 +169,7 @@ class DevServer {
    */
   private generateMigrationContent(operations: MigrationOperation[]): string {
     const timestamp = new Date().toISOString();
-    
+
     return `/**
  * Generated migration - ${timestamp}
  * Contains ${operations.length} unsafe operations
@@ -177,16 +180,16 @@ import PocketBase from 'pocketbase';
 export const up = async (pb) => {
   // TODO: Implement migration logic
   console.log('Running migration with ${operations.length} operations:');
-${operations.map(op => `  // ${op.summary}`).join('\n')}
-  
+${operations.map((op) => `  // ${op.summary}`).join('\n')}
+
   // Example implementation:
-${operations.map(op => this.generateOperationCode(op)).join('\n\n')}
+${operations.map((op) => this.generateOperationCode(op)).join('\n\n')}
 };
 
 export const down = async (pb) => {
   // TODO: Implement rollback logic
   console.log('Rolling back migration...');
-  
+
   // Implement reverse operations here
 };
 
@@ -203,13 +206,13 @@ ${this.generateHelperFunctions()}
       case 'deleteCollection':
         return `  // Delete collection '${operation.collection}'
   // await pb.collections.delete('${operation.payload.id}');`;
-      
+
       case 'deleteField':
         return `  // Delete field '${operation.field}' from '${operation.collection}'
   // const collection = await pb.collections.getOne('${operation.collection}');
   // collection.schema = collection.schema.filter(f => f.name !== '${operation.field}');
   // await pb.collections.update(collection.id, collection);`;
-      
+
       case 'typeChange':
         return `  // Change field type for '${operation.field}' in '${operation.collection}'
   // WARNING: This may cause data loss
@@ -220,7 +223,7 @@ ${this.generateHelperFunctions()}
   //   field.type = '${operation.payload.desired.type}';
   //   await pb.collections.update(collection.id, collection);
   // }`;
-      
+
       default:
         return `  // ${operation.summary}
   // TODO: Implement ${operation.kind} operation`;
@@ -240,7 +243,7 @@ const backupData = async (pb, collectionName) => {
     timestamp: new Date().toISOString(),
     records: records
   };
-  
+
   // Save backup to file or another collection
   console.log(\`Backed up \${records.length} records from \${collectionName}\`);
   return backup;
@@ -249,7 +252,7 @@ const backupData = async (pb, collectionName) => {
 // Helper function to migrate field data
 const migrateFieldData = async (pb, collectionName, fieldName, transformer) => {
   const records = await pb.collection(collectionName).getFullList();
-  
+
   for (const record of records) {
     if (record[fieldName] !== undefined) {
       const newValue = transformer(record[fieldName]);
@@ -258,7 +261,7 @@ const migrateFieldData = async (pb, collectionName, fieldName, transformer) => {
       });
     }
   }
-  
+
   console.log(\`Migrated \${records.length} records in \${collectionName}.\${fieldName}\`);
 };`;
   }
@@ -268,11 +271,11 @@ const migrateFieldData = async (pb, collectionName, fieldName, transformer) => {
    */
   async stop(): Promise<void> {
     console.log(chalk.yellow('\n🛑 Stopping dev server...'));
-    
+
     if (this.watcher) {
       await this.watcher.close();
     }
-    
+
     console.log(chalk.green('✅ Dev server stopped'));
   }
 }
@@ -289,7 +292,7 @@ async function main() {
     watchPaths: ['schema/**/*.ts', 'src/schema/**/*.ts'],
     autoApply: true,
     generateMigrations: true,
-    migrationPath: './pb_migrations'
+    migrationPath: './pb_migrations',
   };
 
   const server = new DevServer(config);
@@ -313,7 +316,7 @@ async function main() {
     await server.pbClient.authenticate();
     const currentSchema = await server.pbClient.fetchCurrentSchema();
     const plan = SchemaDiff.buildDiffPlan(exampleSchema, currentSchema);
-    
+
     if (plan.safe.length > 0) {
       console.log(chalk.green(`Applying ${plan.safe.length} safe changes...`));
       for (const operation of plan.safe) {
@@ -321,12 +324,12 @@ async function main() {
         console.log(chalk.green(`  ✅ ${operation.summary}`));
       }
     }
-    
+
     if (plan.unsafe.length > 0) {
       console.log(chalk.yellow(`Found ${plan.unsafe.length} unsafe changes`));
-      plan.unsafe.forEach(op => console.log(chalk.red(`  ❌ ${op.summary}`)));
+      plan.unsafe.forEach((op) => console.log(chalk.red(`  ❌ ${op.summary}`)));
     }
-    
+
     console.log(chalk.green('✅ Schema sync complete'));
   }
 }

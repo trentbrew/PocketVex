@@ -25,17 +25,17 @@ program
   .option('--force', 'Skip confirmation prompts')
   .action(async (options) => {
     const spinner = ora('Analyzing schema changes...').start();
-    
+
     try {
       const config = {
         url: process.env.PB_URL || 'http://127.0.0.1:8090',
         adminEmail: process.env.PB_ADMIN_EMAIL || 'admin@example.com',
-        adminPassword: process.env.PB_ADMIN_PASS || 'admin123'
+        adminPassword: process.env.PB_ADMIN_PASS || 'admin123',
       };
 
       const pbClient = new PocketBaseClient(config);
       await pbClient.authenticate();
-      
+
       const currentSchema = await pbClient.fetchCurrentSchema();
       const plan = SchemaDiff.buildDiffPlan(exampleSchema, currentSchema);
 
@@ -45,12 +45,18 @@ program
       }
 
       if (plan.unsafe.length > 0) {
-        spinner.warn(`Found ${plan.unsafe.length} unsafe changes that will be skipped`);
+        spinner.warn(
+          `Found ${plan.unsafe.length} unsafe changes that will be skipped`,
+        );
         console.log(chalk.yellow('\n⚠️  Unsafe changes detected:'));
-        plan.unsafe.forEach(op => {
+        plan.unsafe.forEach((op) => {
           console.log(chalk.red(`  ❌ ${op.summary}`));
         });
-        console.log(chalk.gray('\nUse "pocketvex migrate generate" to create a migration for these changes'));
+        console.log(
+          chalk.gray(
+            '\nUse "pocketvex migrate generate" to create a migration for these changes',
+          ),
+        );
       }
 
       spinner.succeed(`Found ${plan.safe.length} safe changes to apply`);
@@ -68,8 +74,8 @@ program
             type: 'confirm',
             name: 'confirmed',
             message: 'Apply these changes?',
-            default: true
-          }
+            default: true,
+          },
         ]);
 
         if (!confirmed) {
@@ -80,7 +86,7 @@ program
 
       // Apply changes
       const applySpinner = ora('Applying changes...').start();
-      
+
       for (const operation of plan.safe) {
         try {
           await pbClient.applyOperation(operation);
@@ -93,7 +99,6 @@ program
       }
 
       applySpinner.succeed(`Applied ${plan.safe.length} changes successfully`);
-
     } catch (error) {
       spinner.fail('Failed to apply schema changes');
       console.error(chalk.red('Error:'), error);
@@ -107,17 +112,17 @@ program
   .option('--force', 'Skip confirmation prompts')
   .action(async (options) => {
     const spinner = ora('Analyzing schema changes...').start();
-    
+
     try {
       const config = {
         url: process.env.PB_URL || 'http://127.0.0.1:8090',
         adminEmail: process.env.PB_ADMIN_EMAIL || 'admin@example.com',
-        adminPassword: process.env.PB_ADMIN_PASS || 'admin123'
+        adminPassword: process.env.PB_ADMIN_PASS || 'admin123',
       };
 
       const pbClient = new PocketBaseClient(config);
       await pbClient.authenticate();
-      
+
       const currentSchema = await pbClient.fetchCurrentSchema();
       const plan = SchemaDiff.buildDiffPlan(exampleSchema, currentSchema);
 
@@ -126,7 +131,9 @@ program
         return;
       }
 
-      spinner.succeed(`Found ${plan.safe.length} safe and ${plan.unsafe.length} unsafe changes`);
+      spinner.succeed(
+        `Found ${plan.safe.length} safe and ${plan.unsafe.length} unsafe changes`,
+      );
 
       // Show all changes
       if (plan.safe.length > 0) {
@@ -150,8 +157,8 @@ program
             type: 'confirm',
             name: 'confirmed',
             message: 'Apply ALL changes (including unsafe ones)?',
-            default: false
-          }
+            default: false,
+          },
         ]);
 
         if (!confirmed) {
@@ -163,7 +170,7 @@ program
       // Apply safe changes first
       if (plan.safe.length > 0) {
         const safeSpinner = ora('Applying safe changes...').start();
-        
+
         for (const operation of plan.safe) {
           try {
             await pbClient.applyOperation(operation);
@@ -181,7 +188,7 @@ program
       // Apply unsafe changes
       if (plan.unsafe.length > 0) {
         const unsafeSpinner = ora('Applying unsafe changes...').start();
-        
+
         for (const operation of plan.unsafe) {
           try {
             await pbClient.applyOperation(operation);
@@ -197,7 +204,6 @@ program
       }
 
       console.log(chalk.green('\n✅ All changes applied successfully'));
-
     } catch (error) {
       spinner.fail('Failed to apply schema changes');
       console.error(chalk.red('Error:'), error);
@@ -210,17 +216,17 @@ program
   .description('Show schema differences without applying')
   .action(async () => {
     const spinner = ora('Analyzing schema changes...').start();
-    
+
     try {
       const config = {
         url: process.env.PB_URL || 'http://127.0.0.1:8090',
         adminEmail: process.env.PB_ADMIN_EMAIL || 'admin@example.com',
-        adminPassword: process.env.PB_ADMIN_PASS || 'admin123'
+        adminPassword: process.env.PB_ADMIN_PASS || 'admin123',
       };
 
       const pbClient = new PocketBaseClient(config);
       await pbClient.authenticate();
-      
+
       const currentSchema = await pbClient.fetchCurrentSchema();
       const plan = SchemaDiff.buildDiffPlan(exampleSchema, currentSchema);
 
@@ -248,9 +254,14 @@ program
         });
       }
 
-      console.log(chalk.gray('\n💡 Use "pocketvex apply safe" to apply safe changes'));
-      console.log(chalk.gray('💡 Use "pocketvex migrate generate" to create migration for unsafe changes'));
-
+      console.log(
+        chalk.gray('\n💡 Use "pocketvex apply safe" to apply safe changes'),
+      );
+      console.log(
+        chalk.gray(
+          '💡 Use "pocketvex migrate generate" to create migration for unsafe changes',
+        ),
+      );
     } catch (error) {
       spinner.fail('Failed to analyze schema');
       console.error(chalk.red('Error:'), error);
