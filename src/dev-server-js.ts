@@ -303,7 +303,7 @@ export class DevServerJS {
     // This would scan all schema files and sync them
     // For now, we'll use the example schema
     try {
-      const { schema } = await import('../schema/example.js');
+      const { schema } = await import('./schema/example.js');
       if (schema) {
         await this.syncSchema(schema);
       }

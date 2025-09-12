@@ -11,13 +11,14 @@ PocketVex provides a Convex-style development experience for PocketBase, allowin
 - **Safe vs Unsafe Operations**: Automatically categorizes changes and handles them appropriately
 - **Migration Generation**: Generate migration files for production deployments
 - **Development Server**: Hot-reload schema changes during development
-- **CLI Tools**: Comprehensive command-line interface for schema management
+- **Unified CLI**: Comprehensive command-line interface with organized commands
 - **JavaScript VM Integration**: Full support for PocketBase JavaScript features
 - **Event Hooks**: Custom business logic with TypeScript definitions
 - **Scheduled Jobs**: CRON jobs for automation and background tasks
 - **Console Commands**: Custom CLI commands for database management
 - **Raw Database Queries**: Advanced SQL operations with type safety
 - **Type Generation**: Automatic TypeScript types from schema definitions
+- **Interactive Demos**: Comprehensive demo system for learning and testing
 - **Convex-like Experience**: Complete development workflow similar to Convex
 
 ## 📦 Installation
@@ -62,7 +63,38 @@ export PB_ADMIN_PASS="admin123"
 
 ## 🎯 Quick Start
 
-### 1. Start Development Server
+### 1. Unified CLI Commands
+
+PocketVex now features a unified CLI system with organized commands:
+
+```bash
+# Show all available commands
+bun run cli help
+
+# Schema management
+bun run cli schema diff          # Show schema differences
+bun run cli schema apply         # Apply schema changes
+
+# Migration management
+bun run cli migrate generate     # Generate migration files
+bun run cli migrate up           # Run migrations
+bun run cli migrate down         # Rollback migrations
+bun run cli migrate status       # Show migration status
+
+# Type generation
+bun run cli types generate       # Generate TypeScript types
+
+# Development
+bun run cli dev start            # Start development server
+
+# Interactive demos
+bun run cli demo run             # Run unified demo system
+
+# Utilities
+bun run cli util test-connection # Test PocketBase connection
+```
+
+### 2. Start Development Server
 
 ```bash
 # Start with file watching
@@ -72,7 +104,7 @@ bun run dev --watch
 bun run dev
 ```
 
-### 2. Live Demo with PocketBase Instance
+### 3. Live Demo with PocketBase Instance
 
 Try PocketVex with a live PocketBase instance:
 
@@ -82,17 +114,16 @@ export PB_URL="https://pocketvex.pockethost.io/"
 export PB_ADMIN_EMAIL="your-admin@email.com"
 export PB_ADMIN_PASS="your-admin-password"
 
-# Run live demo
-bun run demo-with-live-pb
+# Run unified demo system (interactive)
+bun run demo
 
-# Run real-time migration demo
-bun run realtime-migration
-
-# Run incremental migration demo
-bun run incremental-migration
-
-# Or test connection
-bun run test-connection
+# Or run specific demo modes
+bun run demo:basic          # Basic schema demo
+bun run demo:live           # Live PocketBase demo
+bun run demo:realtime       # Real-time migration demo
+bun run demo:incremental    # Incremental migration demo
+bun run demo:js-vm          # JavaScript VM features demo
+bun run demo:test           # Connection test demo
 ```
 
 **Note**: You'll need the actual admin credentials for the live PocketBase instance to run the full demo.
@@ -223,16 +254,27 @@ bun run migrate status
 
 ```
 pocketvex/
-├── src/
-│   ├── types/           # TypeScript definitions
-│   ├── utils/           # Core utilities (diff, pocketbase client)
-│   ├── cli/             # CLI commands
-│   ├── schema/          # Example schema definitions
-│   ├── dev-server.ts    # Development server
-│   └── index.ts         # Main entry point
-├── schema/              # Your schema definitions
-├── pb_migrations/       # Generated migration files
-├── examples/            # Example projects
+├── src/                    # Core library code
+│   ├── types/              # TypeScript definitions
+│   ├── utils/              # Core utilities (diff, pocketbase client, demo utils)
+│   ├── cli/                # Unified CLI system
+│   │   └── index.ts        # Main CLI entry point
+│   ├── schema/             # Example schema definitions
+│   ├── dev-server.ts       # Development server
+│   └── index.ts            # Main entry point
+├── examples/               # Example projects and demos
+│   ├── basic/              # Basic usage examples
+│   ├── live-demo/          # Live PocketBase demos
+│   ├── javascript-vm/      # PocketBase JS VM examples
+│   └── demo.ts             # Unified demo system
+├── docs/                   # Documentation and templates
+│   ├── templates/          # Development templates
+│   └── memory/             # Project constitution
+├── config/                 # Configuration files
+├── scripts/                # Build and utility scripts
+├── schema/                 # Your schema definitions
+├── generated/              # Auto-generated files
+├── pb_migrations/          # Generated migration files
 └── README.md
 ```
 
