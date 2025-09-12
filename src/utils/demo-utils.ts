@@ -69,10 +69,55 @@ export class DemoUtils {
         choices: [
           { name: '🌐 Live Instance (pocketvex.pockethost.io)', value: 'live' },
           { name: '🏠 Local Instance (127.0.0.1:8090)', value: 'local' },
+          { name: '⚙️  Custom Instance', value: 'custom' },
         ],
       },
     ]);
+    
+    if (instance === 'custom') {
+      return await this.collectCustomCredentials();
+    }
+    
     return configs[instance as keyof DemoConfigs];
+  }
+
+  /**
+   * Collect custom PocketBase credentials
+   */
+  static async collectCustomCredentials(): Promise<DemoConfig> {
+    this.printSection('Custom PocketBase Configuration');
+    
+    const { url } = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'url',
+        message: 'PocketBase URL:',
+        default: 'http://127.0.0.1:8090',
+        validate: (input) => input.length > 0 || 'URL cannot be empty',
+      },
+    ]);
+    
+    const { email } = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'email',
+        message: 'Admin email:',
+        default: 'admin@example.com',
+        validate: (input) => input.includes('@') || 'Please enter a valid email address',
+      },
+    ]);
+    
+    const { password } = await inquirer.prompt([
+      {
+        type: 'password',
+        name: 'password',
+        message: 'Admin password:',
+        mask: '*',
+        validate: (input) => input.length > 0 || 'Password cannot be empty',
+      },
+    ]);
+    
+    return { url, adminEmail: email, adminPassword: password };
   }
 
   /**

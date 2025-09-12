@@ -63,9 +63,21 @@ export PB_ADMIN_PASS="admin123"
 
 ## 🎯 Quick Start
 
-### 1. Unified CLI Commands
+### 1. Setup & Configuration
 
-PocketVex now features a unified CLI system with organized commands:
+First, set up your PocketBase credentials:
+
+```bash
+# Interactive setup (recommended for first-time users)
+bun run setup
+
+# Or pass credentials directly to commands
+bun run cli schema diff --url "http://127.0.0.1:8090" --email "admin@example.com" --password "admin123"
+```
+
+### 2. Unified CLI Commands
+
+PocketVex features a unified CLI system with organized commands:
 
 ```bash
 # Show all available commands
@@ -91,10 +103,11 @@ bun run cli dev start            # Start development server
 bun run cli demo run             # Run unified demo system
 
 # Utilities
+bun run cli util setup           # Interactive setup for credentials
 bun run cli util test-connection # Test PocketBase connection
 ```
 
-### 2. Start Development Server
+### 3. Start Development Server
 
 ```bash
 # Start with file watching
@@ -104,7 +117,7 @@ bun run dev --watch
 bun run dev
 ```
 
-### 3. Live Demo with PocketBase Instance
+### 4. Live Demo with PocketBase Instance
 
 Try PocketVex with a live PocketBase instance:
 

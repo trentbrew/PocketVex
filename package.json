@@ -38,6 +38,7 @@
     "schema:diff": "bun run src/cli/index.ts schema diff",
     "types:generate": "bun run src/cli/index.ts types generate",
     "dev:start": "bun run src/cli/index.ts dev start",
+    "setup": "bun run src/cli/index.ts util setup",
     "test-connection": "bun run src/cli/index.ts util test-connection",
     "demo": "bun run examples/demo.ts",
     "demo:basic": "bun run examples/basic/demo.ts",

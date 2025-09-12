@@ -16,19 +16,30 @@ import { schema as exampleSchema2 } from '../schema/example.schema.js';
 // Demo implementations
 class BasicDemo {
   static async run() {
-    DemoUtils.printHeader('PocketVex Basic Demo', 'Schema migration system capabilities');
+    DemoUtils.printHeader(
+      'PocketVex Basic Demo',
+      'Schema migration system capabilities',
+    );
 
     DemoUtils.printSection('Schema Structure');
     console.log(chalk.gray('Example schema contains:'));
-    console.log(chalk.gray(`  - ${exampleSchema.collections.length} collections`));
+    console.log(
+      chalk.gray(`  - ${exampleSchema.collections.length} collections`),
+    );
     exampleSchema.collections.forEach((col) => {
-      console.log(chalk.gray(`    • ${col.name} (${col.schema?.length || 0} fields)`));
+      console.log(
+        chalk.gray(`    • ${col.name} (${col.schema?.length || 0} fields)`),
+      );
     });
 
     console.log(chalk.gray('\nExample schema 2 contains:'));
-    console.log(chalk.gray(`  - ${exampleSchema2.collections.length} collections`));
+    console.log(
+      chalk.gray(`  - ${exampleSchema2.collections.length} collections`),
+    );
     exampleSchema2.collections.forEach((col) => {
-      console.log(chalk.gray(`    • ${col.name} (${col.schema?.length || 0} fields)`));
+      console.log(
+        chalk.gray(`    • ${col.name} (${col.schema?.length || 0} fields)`),
+      );
     });
 
     DemoUtils.printSection('Schema Comparison');
@@ -56,11 +67,13 @@ class BasicDemo {
 
 class LiveDemo {
   static async run() {
-    const config = await DemoUtils.selectPocketBaseInstance(DEFAULT_DEMO_CONFIGS);
+    const config = await DemoUtils.selectPocketBaseInstance(
+      DEFAULT_DEMO_CONFIGS,
+    );
     DemoUtils.printHeader('PocketVex Live Demo', `Connecting to ${config.url}`);
 
     const spinner = DemoUtils.createSpinner('Connecting to PocketBase...');
-    
+
     try {
       const client = new PocketBaseClient({
         url: config.url,
@@ -87,11 +100,16 @@ class LiveDemo {
 
 class RealtimeMigrationDemo {
   static async run() {
-    const config = await DemoUtils.selectPocketBaseInstance(DEFAULT_DEMO_CONFIGS);
-    DemoUtils.printHeader('Real-time Migration Demo', 'Apply safe changes in real-time');
+    const config = await DemoUtils.selectPocketBaseInstance(
+      DEFAULT_DEMO_CONFIGS,
+    );
+    DemoUtils.printHeader(
+      'Real-time Migration Demo',
+      'Apply safe changes in real-time',
+    );
 
     const spinner = DemoUtils.createSpinner('Connecting to PocketBase...');
-    
+
     try {
       const client = new PocketBaseClient({
         url: config.url,
@@ -115,7 +133,10 @@ class RealtimeMigrationDemo {
         console.log(chalk.green(`  ${i + 1}. ${op.summary}`));
       });
 
-      const proceed = await DemoUtils.askConfirmation('Apply these safe changes?', false);
+      const proceed = await DemoUtils.askConfirmation(
+        'Apply these safe changes?',
+        false,
+      );
 
       if (proceed) {
         const applySpinner = DemoUtils.createSpinner('Applying changes...');
@@ -140,8 +161,13 @@ class RealtimeMigrationDemo {
 
 class IncrementalMigrationDemo {
   static async run() {
-    const config = await DemoUtils.selectPocketBaseInstance(DEFAULT_DEMO_CONFIGS);
-    DemoUtils.printHeader('Incremental Migration Demo', 'Step-by-step schema evolution');
+    const config = await DemoUtils.selectPocketBaseInstance(
+      DEFAULT_DEMO_CONFIGS,
+    );
+    DemoUtils.printHeader(
+      'Incremental Migration Demo',
+      'Step-by-step schema evolution',
+    );
 
     // Define schema versions
     const versions = [
@@ -160,7 +186,7 @@ class IncrementalMigrationDemo {
     ]);
 
     const spinner = DemoUtils.createSpinner('Connecting to PocketBase...');
-    
+
     try {
       const client = new PocketBaseClient({
         url: config.url,
@@ -172,15 +198,20 @@ class IncrementalMigrationDemo {
 
       const currentSchema = await client.fetchCurrentSchema();
       const targetSchema = versions[targetVersion].schema;
-      
+
       const plan = SchemaDiff.buildDiffPlan(targetSchema, currentSchema);
 
-      console.log(chalk.gray(`\nMigration plan to ${versions[targetVersion].name}:`));
+      console.log(
+        chalk.gray(`\nMigration plan to ${versions[targetVersion].name}:`),
+      );
       console.log(chalk.gray(`Safe operations: ${plan.safe.length}`));
       console.log(chalk.gray(`Unsafe operations: ${plan.unsafe.length}`));
 
       if (plan.safe.length > 0) {
-      const proceed = await DemoUtils.askConfirmation('Apply safe changes?', false);
+        const proceed = await DemoUtils.askConfirmation(
+          'Apply safe changes?',
+          false,
+        );
 
         if (proceed) {
           const applySpinner = DemoUtils.createSpinner('Applying changes...');
@@ -192,7 +223,11 @@ class IncrementalMigrationDemo {
             applySpinner.succeed('Changes applied successfully!');
             DemoUtils.printDemoComplete('Incremental migration');
           } catch (error) {
-            DemoUtils.handleOperationError(error, applySpinner, 'apply changes');
+            DemoUtils.handleOperationError(
+              error,
+              applySpinner,
+              'apply changes',
+            );
           }
         }
       }
@@ -210,7 +245,12 @@ class IncrementalMigrationDemo {
           type: 'auth' as const,
           schema: [
             { name: 'name', type: 'text' as const, required: true },
-            { name: 'email', type: 'email' as const, required: true, unique: true },
+            {
+              name: 'email',
+              type: 'email' as const,
+              required: true,
+              unique: true,
+            },
           ],
         },
       ],
@@ -226,7 +266,12 @@ class IncrementalMigrationDemo {
           type: 'auth' as const,
           schema: [
             { name: 'name', type: 'text' as const, required: true },
-            { name: 'email', type: 'email' as const, required: true, unique: true },
+            {
+              name: 'email',
+              type: 'email' as const,
+              required: true,
+              unique: true,
+            },
             { name: 'bio', type: 'text' as const },
           ],
         },
@@ -237,7 +282,11 @@ class IncrementalMigrationDemo {
           schema: [
             { name: 'title', type: 'text' as const, required: true },
             { name: 'content', type: 'text' as const, required: true },
-            { name: 'author', type: 'relation' as const, options: { collectionId: 'users_001' } },
+            {
+              name: 'author',
+              type: 'relation' as const,
+              options: { collectionId: 'users_001' },
+            },
           ],
         },
       ],
@@ -253,7 +302,12 @@ class IncrementalMigrationDemo {
           type: 'auth' as const,
           schema: [
             { name: 'name', type: 'text' as const, required: true },
-            { name: 'email', type: 'email' as const, required: true, unique: true },
+            {
+              name: 'email',
+              type: 'email' as const,
+              required: true,
+              unique: true,
+            },
             { name: 'bio', type: 'text' as const },
           ],
         },
@@ -264,7 +318,11 @@ class IncrementalMigrationDemo {
           schema: [
             { name: 'title', type: 'text' as const, required: true },
             { name: 'content', type: 'text' as const, required: true },
-            { name: 'author', type: 'relation' as const, options: { collectionId: 'users_001' } },
+            {
+              name: 'author',
+              type: 'relation' as const,
+              options: { collectionId: 'users_001' },
+            },
             { name: 'published', type: 'bool' as const, required: true },
           ],
         },
@@ -274,8 +332,16 @@ class IncrementalMigrationDemo {
           type: 'base' as const,
           schema: [
             { name: 'content', type: 'text' as const, required: true },
-            { name: 'post', type: 'relation' as const, options: { collectionId: 'posts_001' } },
-            { name: 'author', type: 'relation' as const, options: { collectionId: 'users_001' } },
+            {
+              name: 'post',
+              type: 'relation' as const,
+              options: { collectionId: 'posts_001' },
+            },
+            {
+              name: 'author',
+              type: 'relation' as const,
+              options: { collectionId: 'users_001' },
+            },
           ],
         },
       ],
@@ -285,7 +351,10 @@ class IncrementalMigrationDemo {
 
 class JavaScriptVMFeaturesDemo {
   static async run() {
-    DemoUtils.printHeader('JavaScript VM Features Demo', 'PocketBase server-side capabilities');
+    DemoUtils.printHeader(
+      'JavaScript VM Features Demo',
+      'PocketBase server-side capabilities',
+    );
 
     DemoUtils.printSection('Project Structure');
     console.log(chalk.gray('PocketBase JavaScript files structure:'));
@@ -294,7 +363,9 @@ class JavaScriptVMFeaturesDemo {
     console.log(chalk.gray('  pb_commands/       # Console commands'));
     console.log(chalk.gray('  pb_queries/        # Raw database queries'));
     console.log(chalk.gray('  schema/            # Schema definitions'));
-    console.log(chalk.gray('  generated/         # Generated TypeScript types'));
+    console.log(
+      chalk.gray('  generated/         # Generated TypeScript types'),
+    );
 
     DemoUtils.printSection('TypeScript Type Generation');
     const spinner = DemoUtils.createSpinner('Generating types...');
@@ -302,13 +373,23 @@ class JavaScriptVMFeaturesDemo {
       spinner.start();
       const typesContent = TypeGenerator.generateTypes(exampleSchema);
       // In a real implementation, this would write to files
-      console.log(chalk.gray('Types generated (content length:', typesContent.length, 'characters)'));
+      console.log(
+        chalk.gray(
+          'Types generated (content length:',
+          typesContent.length,
+          'characters)',
+        ),
+      );
       spinner.succeed('Types generated successfully!');
-      
+
       console.log(chalk.gray('\nGenerated files:'));
-      console.log(chalk.gray('  - generated/types.ts (Collection types, CRUD interfaces)'));
+      console.log(
+        chalk.gray(
+          '  - generated/types.ts (Collection types, CRUD interfaces)',
+        ),
+      );
       console.log(chalk.gray('  - generated/api-client.ts (Typed API client)'));
-      
+
       DemoUtils.printDemoComplete('JavaScript VM features');
     } catch (error) {
       DemoUtils.handleOperationError(error, spinner, 'generate types');
@@ -318,11 +399,16 @@ class JavaScriptVMFeaturesDemo {
 
 class TestConnectionDemo {
   static async run() {
-    const config = await DemoUtils.selectPocketBaseInstance(DEFAULT_DEMO_CONFIGS);
-    DemoUtils.printHeader('Connection Test', `Testing connection to ${config.url}`);
+    const config = await DemoUtils.selectPocketBaseInstance(
+      DEFAULT_DEMO_CONFIGS,
+    );
+    DemoUtils.printHeader(
+      'Connection Test',
+      `Testing connection to ${config.url}`,
+    );
 
     const spinner = DemoUtils.createSpinner('Testing connection...');
-    
+
     try {
       spinner.start();
       const client = new PocketBaseClient({
@@ -350,7 +436,7 @@ class TestConnectionDemo {
 async function runDemo() {
   try {
     const mode = await DemoUtils.selectDemoMode();
-    
+
     switch (mode) {
       case 'basic':
         await BasicDemo.run();
@@ -374,7 +460,11 @@ async function runDemo() {
         DemoUtils.printError('Unknown demo mode');
     }
   } catch (error) {
-    DemoUtils.printError(`Demo failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    DemoUtils.printError(
+      `Demo failed: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`,
+    );
     process.exit(1);
   }
 }
