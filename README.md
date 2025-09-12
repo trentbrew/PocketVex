@@ -65,7 +65,26 @@ bun run dev --watch
 bun run dev
 ```
 
-### 2. Define Your Schema
+### 2. Live Demo with PocketBase Instance
+
+Try PocketVex with a live PocketBase instance:
+
+```bash
+# Set up environment variables for live instance
+export PB_URL="https://pocketvex.pockethost.io/"
+export PB_ADMIN_EMAIL="your-admin@email.com"
+export PB_ADMIN_PASS="your-admin-password"
+
+# Run live demo
+bun run demo-with-live-pb
+
+# Or test connection
+bun run test-connection
+```
+
+**Note**: You'll need the actual admin credentials for the live PocketBase instance to run the full demo.
+
+### 3. Define Your Schema
 
 Create schema files in `schema/` directory:
 
@@ -261,10 +280,10 @@ const schema: SchemaDefinition = {
       schema: [
         { name: 'name', type: 'text', required: true },
         { name: 'email', type: 'email', required: true, unique: true },
-        { name: 'bio', type: 'editor', options: {} }
-      ]
-    }
-  ]
+        { name: 'bio', type: 'editor', options: {} },
+      ],
+    },
+  ],
 };
 
 // Compare schemas
@@ -284,7 +303,7 @@ const devServer = new DevServer({
   watchPaths: ['schema/**/*.ts'],
   autoApply: true,
   generateMigrations: true,
-  migrationPath: './migrations'
+  migrationPath: './migrations',
 });
 
 await devServer.start();

@@ -34,7 +34,11 @@
     "migrate": "bun run src/cli/migrate.ts",
     "schema:watch": "bun run src/dev-server.ts --watch",
     "schema:apply": "bun run src/cli/apply.ts",
-    "schema:diff": "bun run src/cli/diff.ts"
+    "schema:diff": "bun run src/cli/diff.ts",
+    "demo": "bun run demo.ts",
+    "live-demo": "bun run live-demo.ts",
+    "demo-with-live-pb": "bun run demo-with-live-pb.ts",
+    "test-connection": "bun run test-connection.ts"
   },
   "dependencies": {
     "pocketbase": "^0.21.1",
