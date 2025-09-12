@@ -52,35 +52,51 @@ export class DevServer {
   async start(): Promise<void> {
     try {
       this.isRunning = true;
-      
-      DemoUtils.printHeader('PocketVex Dev Server', 'Real-time schema migration');
+
+      DemoUtils.printHeader(
+        'PocketVex Dev Server',
+        'Real-time schema migration',
+      );
       console.log(chalk.gray(`Watching: ${this.config.schemaDir}`));
       console.log(chalk.gray(`Target: ${this.config.url}`));
-      console.log(chalk.gray(`Auto-apply: ${this.config.autoApply ? 'enabled' : 'disabled'}`));
-      console.log(chalk.gray(`Type generation: ${this.config.generateTypes ? 'enabled' : 'disabled'}`));
-      
+      console.log(
+        chalk.gray(
+          `Auto-apply: ${this.config.autoApply ? 'enabled' : 'disabled'}`,
+        ),
+      );
+      console.log(
+        chalk.gray(
+          `Type generation: ${
+            this.config.generateTypes ? 'enabled' : 'disabled'
+          }`,
+        ),
+      );
+
       // Ensure directories exist
       await this.ensureDirectories();
-      
+
       // Initial connection test
       await this.testConnection();
-      
+
       // Initial schema sync
       await this.syncSchema();
-      
+
       // Start file watching
       await this.startWatching();
-      
+
       console.log(chalk.green('\n✅ Dev server started successfully!'));
       console.log(chalk.gray('Press Ctrl+C to stop'));
-      
+
       // Keep the process alive
       process.on('SIGINT', () => this.stop());
       process.on('SIGTERM', () => this.stop());
-      
     } catch (error) {
       this.spinner.fail('Failed to start dev server');
-      DemoUtils.printError(`Startup failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      DemoUtils.printError(
+        `Startup failed: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      );
       process.exit(1);
     }
   }
@@ -90,14 +106,14 @@ export class DevServer {
    */
   async stop(): Promise<void> {
     if (!this.isRunning) return;
-    
+
     this.isRunning = false;
     console.log(chalk.gray('\n🛑 Stopping dev server...'));
-    
+
     if (this.watcher) {
       await this.watcher.close();
     }
-    
+
     console.log(chalk.green('✅ Dev server stopped'));
     process.exit(0);
   }
@@ -107,13 +123,17 @@ export class DevServer {
    */
   private async testConnection(): Promise<void> {
     this.spinner.start('Testing connection...');
-    
+
     try {
       await this.client.authenticate();
       this.spinner.succeed('Connected to PocketBase');
     } catch (error) {
       this.spinner.fail('Connection failed');
-      throw new Error(`Failed to connect to PocketBase: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to connect to PocketBase: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      );
     }
   }
 
@@ -121,8 +141,12 @@ export class DevServer {
    * Ensure required directories exist
    */
   private async ensureDirectories(): Promise<void> {
-    const dirs = [this.config.schemaDir, this.config.migrationsDir, this.config.generatedDir];
-    
+    const dirs = [
+      this.config.schemaDir,
+      this.config.migrationsDir,
+      this.config.generatedDir,
+    ];
+
     for (const dir of dirs) {
       try {
         await access(dir);
@@ -140,7 +164,7 @@ export class DevServer {
    */
   private async startWatching(): Promise<void> {
     this.spinner.start('Starting file watcher...');
-    
+
     this.watcher = watch(this.config.watchPatterns, {
       ignored: /(^|[\/\\])\../, // ignore dotfiles
       persistent: true,
@@ -161,21 +185,27 @@ export class DevServer {
   /**
    * Handle file changes
    */
-  private async handleFileChange(event: string, filePath: string): Promise<void> {
+  private async handleFileChange(
+    event: string,
+    filePath: string,
+  ): Promise<void> {
     if (!this.isRunning) return;
-    
+
     const relativePath = relative(process.cwd(), filePath);
     const fileName = basename(filePath);
-    
+
     if (this.config.verbose) {
       console.log(chalk.gray(`\n📁 ${event}: ${relativePath}`));
     }
-    
+
     // Handle schema files
-    if (filePath.includes('schema') && (fileName.endsWith('.ts') || fileName.endsWith('.js'))) {
+    if (
+      filePath.includes('schema') &&
+      (fileName.endsWith('.ts') || fileName.endsWith('.js'))
+    ) {
       await this.handleSchemaChange(event, filePath);
     }
-    
+
     // Handle JavaScript VM files
     if (filePath.includes('pb_') || filePath.includes('javascript-vm')) {
       await this.handleJavaScriptVMChange(event, filePath);
@@ -185,46 +215,59 @@ export class DevServer {
   /**
    * Handle schema file changes
    */
-  private async handleSchemaChange(event: string, filePath: string): Promise<void> {
+  private async handleSchemaChange(
+    event: string,
+    filePath: string,
+  ): Promise<void> {
     try {
       if (event === 'unlink') {
-        console.log(chalk.yellow(`⚠️  Schema file removed: ${basename(filePath)}`));
+        console.log(
+          chalk.yellow(`⚠️  Schema file removed: ${basename(filePath)}`),
+        );
         return;
       }
-      
+
       // Read the schema file
       const schemaContent = await readFile(filePath, 'utf8');
       const schemaHash = this.hashContent(schemaContent);
-      
+
       // Skip if content hasn't changed
       if (schemaHash === this.lastSchemaHash) {
         return;
       }
-      
+
       this.lastSchemaHash = schemaHash;
-      
+
       console.log(chalk.blue(`\n🔄 Schema changed: ${basename(filePath)}`));
-      
+
       // Parse and validate schema
       const schema = await this.parseSchemaFile(filePath, schemaContent);
-      
+
       // Sync with PocketBase
       await this.syncSchema(schema);
-      
     } catch (error) {
-      console.error(chalk.red(`❌ Schema sync failed: ${error instanceof Error ? error.message : 'Unknown error'}`));
+      console.error(
+        chalk.red(
+          `❌ Schema sync failed: ${
+            error instanceof Error ? error.message : 'Unknown error'
+          }`,
+        ),
+      );
     }
   }
 
   /**
    * Handle JavaScript VM file changes
    */
-  private async handleJavaScriptVMChange(event: string, filePath: string): Promise<void> {
+  private async handleJavaScriptVMChange(
+    event: string,
+    filePath: string,
+  ): Promise<void> {
     const fileName = basename(filePath);
     const relativePath = relative(process.cwd(), filePath);
-    
+
     console.log(chalk.blue(`\n🔄 JS VM file ${event}: ${fileName}`));
-    
+
     // In a real implementation, this would sync the JS file to PocketBase
     // For now, we'll just log the change
     console.log(chalk.gray(`  File: ${relativePath}`));
@@ -238,41 +281,40 @@ export class DevServer {
   private async syncSchema(desiredSchema?: any): Promise<void> {
     try {
       this.spinner.start('Syncing schema...');
-      
+
       // Get current schema from PocketBase
       const currentSchema = await this.client.fetchCurrentSchema();
-      
+
       // Use provided schema or load from files
-      const targetSchema = desiredSchema || await this.loadSchemaFromFiles();
-      
+      const targetSchema = desiredSchema || (await this.loadSchemaFromFiles());
+
       if (!targetSchema) {
         this.spinner.fail('No schema found to sync');
         return;
       }
-      
+
       // Build diff plan
       const plan = SchemaDiff.buildDiffPlan(targetSchema, currentSchema);
-      
+
       this.spinner.succeed('Schema analysis complete');
-      
+
       // Display plan
       this.displayMigrationPlan(plan);
-      
+
       // Apply safe changes automatically
       if (plan.safe.length > 0 && this.config.autoApply) {
         await this.applySafeChanges(plan.safe);
       }
-      
+
       // Generate migration files for unsafe changes
       if (plan.unsafe.length > 0) {
         await this.generateMigrationFiles(plan.unsafe);
       }
-      
+
       // Generate types if enabled
       if (this.config.generateTypes) {
         await this.generateTypes(targetSchema);
       }
-      
     } catch (error) {
       this.spinner.fail('Schema sync failed');
       throw error;
@@ -291,7 +333,10 @@ export class DevServer {
   /**
    * Parse schema file content
    */
-  private async parseSchemaFile(filePath: string, content: string): Promise<any> {
+  private async parseSchemaFile(
+    filePath: string,
+    content: string,
+  ): Promise<any> {
     // This would parse the schema file and return the schema object
     // For now, we'll use a simple approach
     try {
@@ -299,7 +344,11 @@ export class DevServer {
       const module = await import(filePath);
       return module.schema || module.default;
     } catch (error) {
-      throw new Error(`Failed to parse schema file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to parse schema file: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      );
     }
   }
 
@@ -310,14 +359,14 @@ export class DevServer {
     console.log(chalk.gray('\n📋 Migration Plan:'));
     console.log(chalk.green(`  Safe operations: ${plan.safe.length}`));
     console.log(chalk.yellow(`  Unsafe operations: ${plan.unsafe.length}`));
-    
+
     if (plan.safe.length > 0) {
       console.log(chalk.gray('\n  Safe changes:'));
       plan.safe.forEach((op: any, i: number) => {
         console.log(chalk.gray(`    ${i + 1}. ${op.summary}`));
       });
     }
-    
+
     if (plan.unsafe.length > 0) {
       console.log(chalk.gray('\n  Unsafe changes:'));
       plan.unsafe.forEach((op: any, i: number) => {
@@ -334,15 +383,15 @@ export class DevServer {
    */
   private async applySafeChanges(safeOperations: any[]): Promise<void> {
     if (safeOperations.length === 0) return;
-    
+
     const applySpinner = ora('Applying safe changes...').start();
-    
+
     try {
       for (const operation of safeOperations) {
         // In a real implementation, this would apply the operation to PocketBase
         console.log(chalk.green(`  ✅ Applied: ${operation.summary}`));
       }
-      
+
       applySpinner.succeed(`Applied ${safeOperations.length} safe changes`);
     } catch (error) {
       applySpinner.fail('Failed to apply safe changes');
@@ -355,17 +404,22 @@ export class DevServer {
    */
   private async generateMigrationFiles(unsafeOperations: any[]): Promise<void> {
     if (unsafeOperations.length === 0) return;
-    
+
     const generateSpinner = ora('Generating migration files...').start();
-    
+
     try {
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const migrationFile = join(this.config.migrationsDir, `${timestamp}_unsafe_changes.js`);
-      
+      const migrationFile = join(
+        this.config.migrationsDir,
+        `${timestamp}_unsafe_changes.js`,
+      );
+
       const migrationContent = this.generateMigrationContent(unsafeOperations);
       await writeFile(migrationFile, migrationContent);
-      
-      generateSpinner.succeed(`Generated migration file: ${basename(migrationFile)}`);
+
+      generateSpinner.succeed(
+        `Generated migration file: ${basename(migrationFile)}`,
+      );
       console.log(chalk.gray(`  File: ${migrationFile}`));
     } catch (error) {
       generateSpinner.fail('Failed to generate migration files');
@@ -378,7 +432,7 @@ export class DevServer {
    */
   private generateMigrationContent(operations: any[]): string {
     const timestamp = new Date().toISOString();
-    
+
     return `/**
  * Migration: ${timestamp}
  * Generated by PocketVex Dev Server
@@ -387,7 +441,7 @@ export class DevServer {
 export const up = async (pb) => {
   // Unsafe operations requiring manual review
 ${operations.map((op, i) => `  // ${i + 1}. ${op.summary}`).join('\n')}
-  
+
   // TODO: Implement migration logic
   console.log('Running migration: ${timestamp}');
 };
@@ -395,7 +449,7 @@ ${operations.map((op, i) => `  // ${i + 1}. ${op.summary}`).join('\n')}
 export const down = async (pb) => {
   // Rollback operations
   console.log('Rolling back migration: ${timestamp}');
-  
+
   // TODO: Implement rollback logic
 };
 `;
@@ -406,12 +460,12 @@ export const down = async (pb) => {
    */
   private async generateTypes(schema: any): Promise<void> {
     const typeSpinner = ora('Generating TypeScript types...').start();
-    
+
     try {
       const typesContent = TypeGenerator.generateTypes(schema);
       const typesFile = join(this.config.generatedDir, 'types.ts');
       await writeFile(typesFile, typesContent);
-      
+
       typeSpinner.succeed('TypeScript types generated');
       console.log(chalk.gray(`  File: ${typesFile}`));
     } catch (error) {
@@ -428,7 +482,7 @@ export const down = async (pb) => {
     let hash = 0;
     for (let i = 0; i < content.length; i++) {
       const char = content.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return hash.toString(36);
@@ -438,7 +492,9 @@ export const down = async (pb) => {
 /**
  * Start development server with configuration
  */
-export async function startDevServer(config: Partial<DevServerConfig> = {}): Promise<void> {
+export async function startDevServer(
+  config: Partial<DevServerConfig> = {},
+): Promise<void> {
   const defaultConfig: DevServerConfig = {
     url: 'http://127.0.0.1:8090',
     adminEmail: 'admin@example.com',

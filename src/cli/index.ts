@@ -451,63 +451,71 @@ const devCmd = program
 devCmd
   .command('start')
   .description('Start the development server with file watching')
-  .option('--watch', 'Watch for file changes', true)
-  .option('--no-watch', 'Disable file watching')
+  .option('--once', 'Run once without watching (one-time sync)')
   .action(async (options) => {
     try {
       const credentials = await collectCredentials(program.opts());
-      
+
       const config = {
         url: credentials.url,
         adminEmail: credentials.email,
         adminPassword: credentials.password,
-        autoApply: options.watch !== false, // Default to true unless explicitly disabled
+        autoApply: !options.once, // Auto-apply unless --once is specified
         generateTypes: true,
         verbose: program.opts().verbose || false,
       };
 
-      // Handle watch/no-watch options
-      const shouldWatch = options.watch !== false && !options.noWatch;
+      // Default to watching unless --once is specified
+      const shouldWatch = !options.once;
 
       if (shouldWatch) {
-        DemoUtils.printInfo('Starting development server with file watching...');
+        DemoUtils.printInfo(
+          'Starting development server with file watching...',
+        );
         DemoUtils.printInfo('Press Ctrl+C to stop');
-        
+
         await startDevServer(config);
       } else {
         DemoUtils.printInfo('Starting one-time schema sync...');
-        
+
         // For one-time sync, we'll use the existing schema apply logic
         const client = new PocketBaseClient({
           url: credentials.url,
           adminEmail: credentials.email,
           adminPassword: credentials.password,
         });
-        
+
         const spinner = DemoUtils.createSpinner('Connecting to PocketBase...');
         spinner.start();
-        
+
         await client.authenticate();
         spinner.succeed('Connected successfully!');
-        
+
         const currentSchema = await client.fetchCurrentSchema();
         const plan = SchemaDiff.buildDiffPlan(exampleSchema, currentSchema);
-        
+
         if (plan.safe.length > 0) {
           DemoUtils.printSection('Safe Operations');
           DemoUtils.formatMigrationPlan({ safe: plan.safe, unsafe: [] });
-          
-          const proceed = await DemoUtils.askConfirmation('Apply these safe changes?', false);
-          
+
+          const proceed = await DemoUtils.askConfirmation(
+            'Apply these safe changes?',
+            false,
+          );
+
           if (proceed) {
             const applySpinner = DemoUtils.createSpinner('Applying changes...');
             applySpinner.start();
-            
+
             try {
               // In real implementation, this would apply the operations
               applySpinner.succeed('Schema sync complete!');
             } catch (error) {
-              DemoUtils.handleOperationError(error, applySpinner, 'apply changes');
+              DemoUtils.handleOperationError(
+                error,
+                applySpinner,
+                'apply changes',
+              );
             }
           }
         } else {
@@ -806,7 +814,10 @@ program
       chalk.gray('  types generate       # Generate TypeScript types'),
     );
     console.log(
-      chalk.gray('  dev start            # Start development server'),
+      chalk.gray('  dev start            # Start development server (with watching)'),
+    );
+    console.log(
+      chalk.gray('  dev start --once     # One-time schema sync'),
     );
     console.log(chalk.gray('  demo run             # Run interactive demos'));
     console.log(

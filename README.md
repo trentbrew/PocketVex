@@ -128,20 +128,19 @@ bun run cli util test-connection # Test PocketBase connection
 PocketVex includes a real-time development server similar to `npx convex dev`:
 
 ```bash
-# Start dev server with file watching (recommended)
+# Start dev server with file watching (default behavior)
 bun run dev
 
 # Or use the CLI directly
-bun run cli dev start --watch
+bun run cli dev start
 
 # One-time schema sync (no watching)
-bun run dev:sync
-
-# Legacy commands (still work)
-bun run dev:start
+bun run dev:once
+# Or: bun run cli dev start --once
 ```
 
 **🔄 Real-time Features:**
+
 - **File Watching:** Automatically detects schema changes
 - **Safe Changes:** Applied immediately to PocketBase
 - **Unsafe Changes:** Generate migration files for review
@@ -151,11 +150,13 @@ bun run dev:start
 #### Development Workflow
 
 1. **Start the dev server:**
+
    ```bash
    bun run dev
    ```
 
 2. **Edit schema files** in the `schema/` directory:
+
    ```typescript
    // schema/my-schema.ts
    export const schema = {
@@ -173,6 +174,7 @@ bun run dev:start
    ```
 
 3. **Watch the magic happen:**
+
    - ✅ Safe changes (add fields, indexes) → Applied automatically
    - ⚠️ Unsafe changes (remove fields, change types) → Migration files generated
    - 📝 TypeScript types → Auto-generated in `generated/`
