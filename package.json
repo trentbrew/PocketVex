@@ -25,7 +25,6 @@
     }
   },
   "scripts": {
-    "dev": "bun run src/dev-server.ts",
     "build": "bun build src/lib.ts --outdir dist --target node --format esm && bun build src/index.ts --outdir dist --target node --format esm && bunx tsc --project config/tsconfig.build.json --emitDeclarationOnly",
     "prepublishOnly": "npm run build",
     "typecheck": "bunx tsc --project config/tsconfig.json --noEmit",
@@ -37,7 +36,9 @@
     "schema:apply": "bun run src/cli/index.ts schema apply",
     "schema:diff": "bun run src/cli/index.ts schema diff",
     "types:generate": "bun run src/cli/index.ts types generate",
+    "dev": "bun run src/cli/index.ts dev start --watch",
     "dev:start": "bun run src/cli/index.ts dev start",
+    "dev:sync": "bun run src/cli/index.ts dev start --no-watch",
     "setup": "bun run src/cli/index.ts util setup",
     "credentials": "bun run src/cli/index.ts util credentials",
     "test-connection": "bun run src/cli/index.ts util test-connection",

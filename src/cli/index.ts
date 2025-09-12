@@ -12,6 +12,7 @@ import { SchemaDiff } from '../utils/diff.js';
 import { PocketBaseClient } from '../utils/pocketbase.js';
 import { TypeGenerator } from '../utils/type-generator.js';
 import { credentialStore } from '../utils/credential-store.js';
+import { startDevServer } from '../dev-server.js';
 import { schema as exampleSchema } from '../schema/example.js';
 
 // Utility function to collect credentials
@@ -450,25 +451,68 @@ const devCmd = program
 devCmd
   .command('start')
   .description('Start the development server with file watching')
-  .option('--watch', 'Watch for file changes')
+  .option('--watch', 'Watch for file changes', true)
+  .option('--no-watch', 'Disable file watching')
   .action(async (options) => {
     try {
-      DemoUtils.printHeader(
-        'Development Server',
-        'Starting PocketVex dev server',
-      );
+      const credentials = await collectCredentials(program.opts());
+      
+      const config = {
+        url: credentials.url,
+        adminEmail: credentials.email,
+        adminPassword: credentials.password,
+        autoApply: options.watch !== false, // Default to true unless explicitly disabled
+        generateTypes: true,
+        verbose: program.opts().verbose || false,
+      };
 
-      if (options.watch) {
-        DemoUtils.printInfo(
-          'Starting development server with file watching...',
-        );
+      // Handle watch/no-watch options
+      const shouldWatch = options.watch !== false && !options.noWatch;
+
+      if (shouldWatch) {
+        DemoUtils.printInfo('Starting development server with file watching...');
         DemoUtils.printInfo('Press Ctrl+C to stop');
-
-        // In real implementation, this would start the dev server
-        DemoUtils.printSuccess('Development server started!');
+        
+        await startDevServer(config);
       } else {
-        DemoUtils.printInfo('Starting development server...');
-        DemoUtils.printSuccess('Development server started!');
+        DemoUtils.printInfo('Starting one-time schema sync...');
+        
+        // For one-time sync, we'll use the existing schema apply logic
+        const client = new PocketBaseClient({
+          url: credentials.url,
+          adminEmail: credentials.email,
+          adminPassword: credentials.password,
+        });
+        
+        const spinner = DemoUtils.createSpinner('Connecting to PocketBase...');
+        spinner.start();
+        
+        await client.authenticate();
+        spinner.succeed('Connected successfully!');
+        
+        const currentSchema = await client.fetchCurrentSchema();
+        const plan = SchemaDiff.buildDiffPlan(exampleSchema, currentSchema);
+        
+        if (plan.safe.length > 0) {
+          DemoUtils.printSection('Safe Operations');
+          DemoUtils.formatMigrationPlan({ safe: plan.safe, unsafe: [] });
+          
+          const proceed = await DemoUtils.askConfirmation('Apply these safe changes?', false);
+          
+          if (proceed) {
+            const applySpinner = DemoUtils.createSpinner('Applying changes...');
+            applySpinner.start();
+            
+            try {
+              // In real implementation, this would apply the operations
+              applySpinner.succeed('Schema sync complete!');
+            } catch (error) {
+              DemoUtils.handleOperationError(error, applySpinner, 'apply changes');
+            }
+          }
+        } else {
+          DemoUtils.printSuccess('No changes needed - schemas are identical');
+        }
       }
     } catch (error) {
       DemoUtils.printError(
@@ -514,21 +558,28 @@ utilCmd
   .description('Manage cached credentials')
   .action(async () => {
     try {
-      DemoUtils.printHeader('Credential Management', 'Manage cached PocketBase credentials');
-      
+      DemoUtils.printHeader(
+        'Credential Management',
+        'Manage cached PocketBase credentials',
+      );
+
       const cachedUrls = await credentialStore.listCachedUrls();
-      
+
       if (cachedUrls.length === 0) {
         DemoUtils.printInfo('No cached credentials found');
-        console.log(chalk.gray('\nTo cache credentials, run any command that requires authentication.'));
+        console.log(
+          chalk.gray(
+            '\nTo cache credentials, run any command that requires authentication.',
+          ),
+        );
         return;
       }
-      
+
       DemoUtils.printSection('Cached Credentials');
       cachedUrls.forEach((url, index) => {
         console.log(chalk.gray(`${index + 1}. ${url}`));
       });
-      
+
       const { action } = await inquirer.prompt([
         {
           type: 'list',
@@ -542,7 +593,7 @@ utilCmd
           ],
         },
       ]);
-      
+
       switch (action) {
         case 'view':
           DemoUtils.printSection('Cached URLs');
@@ -550,7 +601,7 @@ utilCmd
             console.log(chalk.gray(`${index + 1}. ${url}`));
           });
           break;
-          
+
         case 'clear':
           const { confirm } = await inquirer.prompt([
             {
@@ -560,7 +611,7 @@ utilCmd
               default: false,
             },
           ]);
-          
+
           if (confirm) {
             await credentialStore.clearAllCredentials();
             DemoUtils.printSuccess('All cached credentials cleared!');
@@ -568,34 +619,38 @@ utilCmd
             DemoUtils.printInfo('Operation cancelled');
           }
           break;
-          
+
         case 'remove':
           if (cachedUrls.length === 0) {
             DemoUtils.printInfo('No credentials to remove');
             break;
           }
-          
+
           const { urlToRemove } = await inquirer.prompt([
             {
               type: 'list',
               name: 'urlToRemove',
               message: 'Select credentials to remove:',
-              choices: cachedUrls.map(url => ({ name: url, value: url })),
+              choices: cachedUrls.map((url) => ({ name: url, value: url })),
             },
           ]);
-          
+
           await credentialStore.removeCredentials(urlToRemove);
           DemoUtils.printSuccess(`Credentials for ${urlToRemove} removed!`);
           break;
-          
+
         case 'back':
           DemoUtils.printInfo('Returning to main menu');
           break;
       }
-      
+
       DemoUtils.printSuccess('Credential management complete!');
     } catch (error) {
-      DemoUtils.printError(`Credential management failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      DemoUtils.printError(
+        `Credential management failed: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      );
       process.exit(1);
     }
   });

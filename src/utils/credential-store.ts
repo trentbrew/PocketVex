@@ -35,7 +35,11 @@ class CredentialStore {
   private getMachineKey(): string {
     // Create a machine-specific key based on system info
     const machineId = process.platform + process.arch + homedir();
-    return crypto.createHash('sha256').update(machineId).digest('hex').substring(0, 32);
+    return crypto
+      .createHash('sha256')
+      .update(machineId)
+      .digest('hex')
+      .substring(0, 32);
   }
 
   private encrypt(text: string): string {
@@ -61,13 +65,18 @@ class CredentialStore {
   /**
    * Store credentials for a PocketBase instance
    */
-  async storeCredentials(url: string, email: string, password: string, ttlHours: number = 24): Promise<void> {
+  async storeCredentials(
+    url: string,
+    email: string,
+    password: string,
+    ttlHours: number = 24,
+  ): Promise<void> {
     try {
       await this.ensureCacheDir();
-      
+
       const cache = await this.loadCache();
-      const expiresAt = Date.now() + (ttlHours * 60 * 60 * 1000);
-      
+      const expiresAt = Date.now() + ttlHours * 60 * 60 * 1000;
+
       cache[url] = {
         url,
         email,
@@ -75,7 +84,7 @@ class CredentialStore {
         timestamp: Date.now(),
         expiresAt,
       };
-      
+
       await this.saveCache(cache);
     } catch (error) {
       // Fail silently - credential caching is optional
@@ -86,21 +95,23 @@ class CredentialStore {
   /**
    * Retrieve credentials for a PocketBase instance
    */
-  async getCredentials(url: string): Promise<{ email: string; password: string } | null> {
+  async getCredentials(
+    url: string,
+  ): Promise<{ email: string; password: string } | null> {
     try {
       const cache = await this.loadCache();
       const stored = cache[url];
-      
+
       if (!stored) {
         return null;
       }
-      
+
       // Check if credentials have expired
       if (Date.now() > stored.expiresAt) {
         await this.removeCredentials(url);
         return null;
       }
-      
+
       return {
         email: stored.email,
         password: this.decrypt(stored.password),
@@ -142,7 +153,7 @@ class CredentialStore {
   async listCachedUrls(): Promise<string[]> {
     try {
       const cache = await this.loadCache();
-      return Object.keys(cache).filter(url => {
+      return Object.keys(cache).filter((url) => {
         const stored = cache[url];
         return stored && Date.now() <= stored.expiresAt;
       });
