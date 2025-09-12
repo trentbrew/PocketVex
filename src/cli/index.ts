@@ -62,12 +62,23 @@ async function collectCredentials(
       password = passwordInput;
     }
 
-    // Cache the credentials for future use
+    // Test connection before caching credentials
     try {
+      const testClient = new PocketBaseClient({
+        url,
+        adminEmail: email,
+        adminPassword: password,
+      });
+      
+      await testClient.authenticate();
+      
+      // Only cache if connection succeeds
       await credentialStore.storeCredentials(url, email, password, 24); // 24 hours TTL
       console.log(chalk.gray('💾 Credentials cached for 24 hours'));
     } catch (error) {
-      // Fail silently - caching is optional
+      // Don't cache if connection fails - but don't throw, just return the credentials
+      // The calling function will handle the connection test
+      console.log(chalk.yellow('⚠️  Connection test will be performed with these credentials'));
     }
   }
 
@@ -226,7 +237,8 @@ schemaCmd
         }
       }
     } catch (error) {
-      DemoUtils.handleConnectionError(error, DemoUtils.createSpinner(''));
+      DemoUtils.printError(`Schema apply failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      process.exit(1);
     }
   });
 
@@ -718,12 +730,13 @@ utilCmd
       await client.authenticate();
       spinner.succeed('Connection successful!');
 
-      // Cache the credentials
+      // Cache the credentials after successful connection
       try {
         await credentialStore.storeCredentials(url, email, password, 24); // 24 hours TTL
         console.log(chalk.gray('💾 Credentials cached for 24 hours'));
       } catch (error) {
         // Fail silently - caching is optional
+        console.log(chalk.yellow('⚠️  Failed to cache credentials (connection was successful)'));
       }
 
       DemoUtils.printSection('Setup Complete');
@@ -773,24 +786,40 @@ utilCmd
       const spinner = DemoUtils.createSpinner('Testing connection...');
       spinner.start();
 
-      const client = new PocketBaseClient({
-        url: credentials.url,
-        adminEmail: credentials.email,
-        adminPassword: credentials.password,
-      });
-      await client.authenticate();
+      try {
+        const client = new PocketBaseClient({
+          url: credentials.url,
+          adminEmail: credentials.email,
+          adminPassword: credentials.password,
+        });
+        await client.authenticate();
 
-      spinner.succeed('Connection successful!');
+        spinner.succeed('Connection successful!');
 
-      DemoUtils.printSection('Instance Information');
-      const schema = await client.fetchCurrentSchema();
-      console.log(chalk.gray(`URL: ${credentials.url}`));
-      console.log(chalk.gray(`Collections: ${schema.collections.length}`));
-      console.log(chalk.gray(`Admin Email: ${credentials.email}`));
+        // Cache credentials after successful connection
+        try {
+          await credentialStore.storeCredentials(credentials.url, credentials.email, credentials.password, 24);
+          console.log(chalk.gray('💾 Credentials cached for 24 hours'));
+        } catch (error) {
+          // Fail silently - caching is optional
+        }
 
-      DemoUtils.printSuccess('Connection test complete!');
+        DemoUtils.printSection('Instance Information');
+        const schema = await client.fetchCurrentSchema();
+        console.log(chalk.gray(`URL: ${credentials.url}`));
+        console.log(chalk.gray(`Collections: ${schema.collections.length}`));
+        console.log(chalk.gray(`Admin Email: ${credentials.email}`));
+
+        DemoUtils.printSuccess('Connection test complete!');
+      } catch (error) {
+        spinner.fail('Connection failed');
+        DemoUtils.printError(`Failed to connect: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        console.log(chalk.gray('\n💡 Please check your PocketBase instance and credentials.'));
+        process.exit(1);
+      }
     } catch (error) {
-      DemoUtils.handleConnectionError(error, DemoUtils.createSpinner(''));
+      DemoUtils.printError(`Test connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      process.exit(1);
     }
   });
 
@@ -814,11 +843,11 @@ program
       chalk.gray('  types generate       # Generate TypeScript types'),
     );
     console.log(
-      chalk.gray('  dev start            # Start development server (with watching)'),
+      chalk.gray(
+        '  dev start            # Start development server (with watching)',
+      ),
     );
-    console.log(
-      chalk.gray('  dev start --once     # One-time schema sync'),
-    );
+    console.log(chalk.gray('  dev start --once     # One-time schema sync'));
     console.log(chalk.gray('  demo run             # Run interactive demos'));
     console.log(
       chalk.gray('  util setup           # Interactive setup for credentials'),
