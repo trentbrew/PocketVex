@@ -17,7 +17,7 @@ export interface SchemaField {
     | 'json'
     | 'file'
     | 'relation'
-    | 'richText';
+    | 'editor';
   required?: boolean;
   unique?: boolean;
   options?: {

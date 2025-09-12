@@ -44,7 +44,7 @@ export const schema: SchemaDefinition = {
         },
         {
           name: 'overview',
-          type: 'richText',
+          type: 'editor',
           options: {},
         },
         {

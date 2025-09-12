@@ -159,7 +159,7 @@ pocketvex/
 - ✅ Add indexes
 - ✅ Increase field limits
 - ✅ Add select values
-- ✅ Add rich text fields
+- ✅ Add editor fields
 
 ### Unsafe Operations (Generate Migrations)
 
@@ -206,7 +206,7 @@ interface SchemaField {
     | 'json'
     | 'file'
     | 'relation'
-    | 'richText';
+    | 'editor';
   required?: boolean; // Required field
   unique?: boolean; // Unique constraint
   options?: {
@@ -225,29 +225,34 @@ interface SchemaField {
 
 ## 🔧 Advanced Usage
 
-### Rich Text Fields
+### Editor Fields (Rich Text)
 
-PocketVex supports PocketBase's rich text field type for storing HTML content:
+PocketVex supports PocketBase's editor field type for storing HTML content:
 
 ```typescript
 {
   name: 'bio',
-  type: 'richText',
+  type: 'editor',
   options: {},
 }
 ```
 
-Rich text fields store HTML content like:
+Editor fields store HTML content like:
+
 ```html
-<p><strong>Trent</strong> like <span style="text-decoration: underline;">computers</span> &amp; snowboarding</p>
+<p>
+  <strong>Trent</strong> like
+  <span style="text-decoration: underline;">computers</span> &amp; snowboarding
+</p>
 ```
 
 **Common use cases:**
+
 - User bios and profiles
 - Article content
 - Course descriptions
 - Product descriptions
-- Any content requiring formatting
+- Any content requiring rich text formatting
 
 ### Custom Schema Loading
 

@@ -63,7 +63,7 @@ export const schema: SchemaDefinition = {
         },
         {
           name: 'bio',
-          type: 'richText',
+          type: 'editor',
           options: {},
         },
       ],
@@ -100,7 +100,7 @@ export const schema: SchemaDefinition = {
         },
         {
           name: 'content',
-          type: 'richText',
+          type: 'editor',
           options: {},
         },
         {
