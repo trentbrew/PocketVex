@@ -78,11 +78,31 @@ export PB_ADMIN_PASS="your-admin-password"
 # Run live demo
 bun run demo-with-live-pb
 
+# Run real-time migration demo
+bun run realtime-migration
+
+# Run incremental migration demo
+bun run incremental-migration
+
 # Or test connection
 bun run test-connection
 ```
 
 **Note**: You'll need the actual admin credentials for the live PocketBase instance to run the full demo.
+
+#### Real-time Migration Demos
+
+PocketVex includes interactive demos that show real-time schema migrations:
+
+- **`realtime-migration`**: Interactive demo that creates collections and applies schema changes in real-time
+- **`incremental-migration`**: Step-by-step schema evolution showing how to migrate from version to version
+
+These demos will:
+- Connect to your live PocketBase instance
+- Show current schema analysis
+- Apply safe schema changes in real-time
+- Demonstrate the difference between safe and unsafe operations
+- Create example collections with various field types
 
 ### 3. Define Your Schema
 

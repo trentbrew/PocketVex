@@ -23,7 +23,11 @@ const mySchema: SchemaDefinition = {
         { name: 'name', type: 'text', required: true },
         { name: 'email', type: 'email', required: true, unique: true },
         { name: 'bio', type: 'editor', options: {} },
-        { name: 'role', type: 'select', options: { values: ['user', 'admin'] } },
+        {
+          name: 'role',
+          type: 'select',
+          options: { values: ['user', 'admin'] },
+        },
       ],
       rules: {
         list: "@request.auth.id != ''",
@@ -38,7 +42,11 @@ const mySchema: SchemaDefinition = {
       schema: [
         { name: 'title', type: 'text', required: true },
         { name: 'content', type: 'editor', options: {} },
-        { name: 'author', type: 'relation', options: { collectionId: 'users' } },
+        {
+          name: 'author',
+          type: 'relation',
+          options: { collectionId: 'users' },
+        },
         { name: 'published', type: 'bool', options: {} },
       ],
       rules: {
@@ -58,7 +66,7 @@ async function example() {
   // 1. Connect to PocketBase
   console.log('1. Connecting to PocketBase...');
   const pbClient = new PocketBaseClient(config);
-  
+
   const isConnected = await pbClient.testConnection();
   if (!isConnected) {
     console.log('❌ Could not connect to PocketBase');
@@ -67,7 +75,7 @@ async function example() {
     console.log('   export PB_ADMIN_PASS="your-password"');
     return;
   }
-  
+
   console.log('✅ Connected successfully!');
 
   // 2. Fetch current schema
@@ -78,7 +86,7 @@ async function example() {
   // 3. Compare schemas
   console.log('\n3. Comparing schemas...');
   const plan = SchemaDiff.buildDiffPlan(mySchema, currentSchema);
-  
+
   console.log(`✅ Safe operations: ${plan.safe.length}`);
   console.log(`⚠️  Unsafe operations: ${plan.unsafe.length}`);
 
@@ -98,7 +106,9 @@ async function example() {
     plan.unsafe.forEach((op, index) => {
       console.log(`   ${index + 1}. ${op.summary}`);
     });
-    console.log('💡 Run "pocketvex migrate generate" to create migration files');
+    console.log(
+      '💡 Run "pocketvex migrate generate" to create migration files',
+    );
   }
 
   // 6. Start development server (optional)
@@ -113,7 +123,7 @@ async function example() {
 
   console.log('🔄 Development server started with file watching');
   console.log('💡 Edit schema files to see changes applied automatically');
-  
+
   // Keep the server running
   await devServer.start();
 }
