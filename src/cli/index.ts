@@ -11,16 +11,29 @@ import { DemoUtils } from '../utils/demo-utils.js';
 import { SchemaDiff } from '../utils/diff.js';
 import { PocketBaseClient } from '../utils/pocketbase.js';
 import { TypeGenerator } from '../utils/type-generator.js';
+import { credentialStore } from '../utils/credential-store.js';
 import { schema as exampleSchema } from '../schema/example.js';
 
 // Utility function to collect credentials
-async function collectCredentials(globalOpts: any): Promise<{url: string, email: string, password: string}> {
+async function collectCredentials(
+  globalOpts: any,
+): Promise<{ url: string; email: string; password: string }> {
   let { url, email, password } = globalOpts;
-  
-  // If credentials are missing, prompt for them
+
+  // First, try to get cached credentials
+  if (!email || !password) {
+    const cached = await credentialStore.getCredentials(url);
+    if (cached) {
+      email = email || cached.email;
+      password = password || cached.password;
+      console.log(chalk.gray('🔐 Using cached credentials'));
+    }
+  }
+
+  // If credentials are still missing, prompt for them
   if (!email || !password) {
     DemoUtils.printSection('PocketBase Credentials');
-    
+
     if (!email) {
       const { emailInput } = await inquirer.prompt([
         {
@@ -28,12 +41,13 @@ async function collectCredentials(globalOpts: any): Promise<{url: string, email:
           name: 'emailInput',
           message: 'Admin email:',
           default: 'admin@example.com',
-          validate: (input) => input.includes('@') || 'Please enter a valid email address',
+          validate: (input) =>
+            input.includes('@') || 'Please enter a valid email address',
         },
       ]);
       email = emailInput;
     }
-    
+
     if (!password) {
       const { passwordInput } = await inquirer.prompt([
         {
@@ -46,8 +60,16 @@ async function collectCredentials(globalOpts: any): Promise<{url: string, email:
       ]);
       password = passwordInput;
     }
+
+    // Cache the credentials for future use
+    try {
+      await credentialStore.storeCredentials(url, email, password, 24); // 24 hours TTL
+      console.log(chalk.gray('💾 Credentials cached for 24 hours'));
+    } catch (error) {
+      // Fail silently - caching is optional
+    }
   }
-  
+
   return { url, email, password };
 }
 
@@ -117,7 +139,7 @@ schemaCmd
       DemoUtils.printHeader('Schema Apply', 'Applying changes to PocketBase');
 
       const credentials = await collectCredentials(globalOpts);
-      
+
       const spinner = DemoUtils.createSpinner('Connecting to PocketBase...');
       spinner.start();
 
@@ -486,14 +508,109 @@ demoCmd
  */
 const utilCmd = program.command('util').description('Utility commands');
 
+// Credential management
+utilCmd
+  .command('credentials')
+  .description('Manage cached credentials')
+  .action(async () => {
+    try {
+      DemoUtils.printHeader('Credential Management', 'Manage cached PocketBase credentials');
+      
+      const cachedUrls = await credentialStore.listCachedUrls();
+      
+      if (cachedUrls.length === 0) {
+        DemoUtils.printInfo('No cached credentials found');
+        console.log(chalk.gray('\nTo cache credentials, run any command that requires authentication.'));
+        return;
+      }
+      
+      DemoUtils.printSection('Cached Credentials');
+      cachedUrls.forEach((url, index) => {
+        console.log(chalk.gray(`${index + 1}. ${url}`));
+      });
+      
+      const { action } = await inquirer.prompt([
+        {
+          type: 'list',
+          name: 'action',
+          message: 'What would you like to do?',
+          choices: [
+            { name: '🔍 View cached URLs', value: 'view' },
+            { name: '🗑️  Clear all credentials', value: 'clear' },
+            { name: '❌ Remove specific credentials', value: 'remove' },
+            { name: '↩️  Back to main menu', value: 'back' },
+          ],
+        },
+      ]);
+      
+      switch (action) {
+        case 'view':
+          DemoUtils.printSection('Cached URLs');
+          cachedUrls.forEach((url, index) => {
+            console.log(chalk.gray(`${index + 1}. ${url}`));
+          });
+          break;
+          
+        case 'clear':
+          const { confirm } = await inquirer.prompt([
+            {
+              type: 'confirm',
+              name: 'confirm',
+              message: 'Are you sure you want to clear all cached credentials?',
+              default: false,
+            },
+          ]);
+          
+          if (confirm) {
+            await credentialStore.clearAllCredentials();
+            DemoUtils.printSuccess('All cached credentials cleared!');
+          } else {
+            DemoUtils.printInfo('Operation cancelled');
+          }
+          break;
+          
+        case 'remove':
+          if (cachedUrls.length === 0) {
+            DemoUtils.printInfo('No credentials to remove');
+            break;
+          }
+          
+          const { urlToRemove } = await inquirer.prompt([
+            {
+              type: 'list',
+              name: 'urlToRemove',
+              message: 'Select credentials to remove:',
+              choices: cachedUrls.map(url => ({ name: url, value: url })),
+            },
+          ]);
+          
+          await credentialStore.removeCredentials(urlToRemove);
+          DemoUtils.printSuccess(`Credentials for ${urlToRemove} removed!`);
+          break;
+          
+        case 'back':
+          DemoUtils.printInfo('Returning to main menu');
+          break;
+      }
+      
+      DemoUtils.printSuccess('Credential management complete!');
+    } catch (error) {
+      DemoUtils.printError(`Credential management failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      process.exit(1);
+    }
+  });
+
 // Setup credentials
 utilCmd
   .command('setup')
   .description('Interactive setup for PocketBase credentials')
   .action(async () => {
     try {
-      DemoUtils.printHeader('PocketVex Setup', 'Configure your PocketBase connection');
-      
+      DemoUtils.printHeader(
+        'PocketVex Setup',
+        'Configure your PocketBase connection',
+      );
+
       const { url } = await inquirer.prompt([
         {
           type: 'input',
@@ -503,17 +620,18 @@ utilCmd
           validate: (input) => input.length > 0 || 'URL cannot be empty',
         },
       ]);
-      
+
       const { email } = await inquirer.prompt([
         {
           type: 'input',
           name: 'email',
           message: 'Admin email:',
           default: 'admin@example.com',
-          validate: (input) => input.includes('@') || 'Please enter a valid email address',
+          validate: (input) =>
+            input.includes('@') || 'Please enter a valid email address',
         },
       ]);
-      
+
       const { password } = await inquirer.prompt([
         {
           type: 'password',
@@ -523,20 +641,28 @@ utilCmd
           validate: (input) => input.length > 0 || 'Password cannot be empty',
         },
       ]);
-      
+
       DemoUtils.printSection('Testing Connection');
       const spinner = DemoUtils.createSpinner('Testing connection...');
       spinner.start();
-      
+
       const client = new PocketBaseClient({
         url,
         adminEmail: email,
         adminPassword: password,
       });
-      
+
       await client.authenticate();
       spinner.succeed('Connection successful!');
-      
+
+      // Cache the credentials
+      try {
+        await credentialStore.storeCredentials(url, email, password, 24); // 24 hours TTL
+        console.log(chalk.gray('💾 Credentials cached for 24 hours'));
+      } catch (error) {
+        // Fail silently - caching is optional
+      }
+
       DemoUtils.printSection('Setup Complete');
       console.log(chalk.gray('Your credentials are configured and working!'));
       console.log(chalk.gray('\nYou can now use PocketVex commands:'));
@@ -544,12 +670,24 @@ utilCmd
       console.log(chalk.gray('  bun run cli schema apply'));
       console.log(chalk.gray('  bun run cli migrate generate'));
       console.log(chalk.gray('\nOr pass credentials directly:'));
-      console.log(chalk.gray(`  bun run cli schema diff --url "${url}" --email "${email}" --password "***"`));
-      
+      console.log(
+        chalk.gray(
+          `  bun run cli schema diff --url "${url}" --email "${email}" --password "***"`,
+        ),
+      );
+      console.log(chalk.gray('\nManage cached credentials:'));
+      console.log(chalk.gray('  bun run cli util credentials'));
+
       DemoUtils.printSuccess('Setup complete!');
     } catch (error) {
-      DemoUtils.printError(`Setup failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      console.log(chalk.gray('\nPlease check your PocketBase instance and credentials.'));
+      DemoUtils.printError(
+        `Setup failed: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      );
+      console.log(
+        chalk.gray('\nPlease check your PocketBase instance and credentials.'),
+      );
       process.exit(1);
     }
   });
@@ -563,7 +701,7 @@ utilCmd
 
     try {
       const credentials = await collectCredentials(globalOpts);
-      
+
       DemoUtils.printHeader(
         'Connection Test',
         `Testing connection to ${credentials.url}`,
@@ -618,6 +756,9 @@ program
     console.log(chalk.gray('  demo run             # Run interactive demos'));
     console.log(
       chalk.gray('  util setup           # Interactive setup for credentials'),
+    );
+    console.log(
+      chalk.gray('  util credentials     # Manage cached credentials'),
     );
     console.log(
       chalk.gray('  util test-connection # Test PocketBase connection'),

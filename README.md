@@ -75,6 +75,21 @@ bun run setup
 bun run cli schema diff --url "http://127.0.0.1:8090" --email "admin@example.com" --password "admin123"
 ```
 
+**🔐 Credential Caching:** PocketVex automatically caches your credentials securely for 24 hours, so you won't need to enter them repeatedly. Credentials are encrypted and stored locally in `~/.pocketvex/credentials.json`.
+
+#### Managing Cached Credentials
+
+```bash
+# View and manage cached credentials
+bun run credentials
+
+# Clear all cached credentials
+bun run cli util credentials  # Then select "Clear all credentials"
+
+# Remove credentials for a specific URL
+bun run cli util credentials  # Then select "Remove specific credentials"
+```
+
 ### 2. Unified CLI Commands
 
 PocketVex features a unified CLI system with organized commands:
@@ -104,6 +119,7 @@ bun run cli demo run             # Run unified demo system
 
 # Utilities
 bun run cli util setup           # Interactive setup for credentials
+bun run cli util credentials     # Manage cached credentials
 bun run cli util test-connection # Test PocketBase connection
 ```
 

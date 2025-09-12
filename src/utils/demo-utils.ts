@@ -30,7 +30,7 @@ export const DEFAULT_DEMO_CONFIGS: DemoConfigs = {
     url: 'http://127.0.0.1:8090',
     adminEmail: 'admin@example.com',
     adminPassword: 'admin123',
-  }
+  },
 };
 
 // Demo utilities class
@@ -60,7 +60,9 @@ export class DemoUtils {
   /**
    * Interactive PocketBase instance selection
    */
-  static async selectPocketBaseInstance(configs: DemoConfigs = DEFAULT_DEMO_CONFIGS): Promise<DemoConfig> {
+  static async selectPocketBaseInstance(
+    configs: DemoConfigs = DEFAULT_DEMO_CONFIGS,
+  ): Promise<DemoConfig> {
     const { instance } = await inquirer.prompt([
       {
         type: 'list',
@@ -73,11 +75,11 @@ export class DemoUtils {
         ],
       },
     ]);
-    
+
     if (instance === 'custom') {
       return await this.collectCustomCredentials();
     }
-    
+
     return configs[instance as keyof DemoConfigs];
   }
 
@@ -86,7 +88,7 @@ export class DemoUtils {
    */
   static async collectCustomCredentials(): Promise<DemoConfig> {
     this.printSection('Custom PocketBase Configuration');
-    
+
     const { url } = await inquirer.prompt([
       {
         type: 'input',
@@ -96,17 +98,18 @@ export class DemoUtils {
         validate: (input) => input.length > 0 || 'URL cannot be empty',
       },
     ]);
-    
+
     const { email } = await inquirer.prompt([
       {
         type: 'input',
         name: 'email',
         message: 'Admin email:',
         default: 'admin@example.com',
-        validate: (input) => input.includes('@') || 'Please enter a valid email address',
+        validate: (input) =>
+          input.includes('@') || 'Please enter a valid email address',
       },
     ]);
-    
+
     const { password } = await inquirer.prompt([
       {
         type: 'password',
@@ -116,7 +119,7 @@ export class DemoUtils {
         validate: (input) => input.length > 0 || 'Password cannot be empty',
       },
     ]);
-    
+
     return { url, adminEmail: email, adminPassword: password };
   }
 
@@ -171,7 +174,9 @@ export class DemoUtils {
   static printSetupInstructions(): void {
     console.log(chalk.gray('\n💡 Setup instructions:'));
     console.log(chalk.gray('  1. Set environment variables:'));
-    console.log(chalk.gray('     export PB_ADMIN_EMAIL="your-email@example.com"'));
+    console.log(
+      chalk.gray('     export PB_ADMIN_EMAIL="your-email@example.com"'),
+    );
     console.log(chalk.gray('     export PB_ADMIN_PASS="your-password"'));
     console.log(chalk.gray('  2. Or update the config in this demo'));
   }
@@ -193,7 +198,9 @@ export class DemoUtils {
    */
   static printAvailableCommands(): void {
     console.log(chalk.gray('Available commands:'));
-    console.log(chalk.gray('  bun run dev --watch     # Start development server'));
+    console.log(
+      chalk.gray('  bun run dev --watch     # Start development server'),
+    );
     console.log(chalk.gray('  bun run schema:apply    # Apply safe changes'));
     console.log(chalk.gray('  bun run schema:diff     # Show differences'));
     console.log(chalk.gray('  bun run migrate generate # Generate migration'));
@@ -223,16 +230,26 @@ export class DemoUtils {
    */
   static handleConnectionError(error: unknown, spinner: Ora): void {
     spinner.fail('Connection failed');
-    this.printError(`Failed to connect: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    this.printError(
+      `Failed to connect: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`,
+    );
     this.printSetupInstructions();
   }
 
   /**
    * Handle operation errors consistently
    */
-  static handleOperationError(error: unknown, spinner: Ora, operation: string): void {
+  static handleOperationError(
+    error: unknown,
+    spinner: Ora,
+    operation: string,
+  ): void {
     spinner.fail(`Failed to ${operation}`);
-    this.printError(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    this.printError(
+      `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
   }
 
   /**
@@ -241,7 +258,9 @@ export class DemoUtils {
   static formatCollectionInfo(collections: any[]): void {
     console.log(chalk.gray(`Found ${collections.length} collections:`));
     collections.forEach((col) => {
-      console.log(chalk.gray(`  • ${col.name} (${col.schema?.length || 0} fields)`));
+      console.log(
+        chalk.gray(`  • ${col.name} (${col.schema?.length || 0} fields)`),
+      );
     });
   }
 
@@ -262,7 +281,9 @@ export class DemoUtils {
     if (plan.unsafe.length > 0) {
       console.log(chalk.gray('\nUnsafe operations requiring migration:'));
       plan.unsafe.forEach((op: any, i: number) => {
-        console.log(chalk.yellow(`  ${i + 1}. ${op.summary || op.description}`));
+        console.log(
+          chalk.yellow(`  ${i + 1}. ${op.summary || op.description}`),
+        );
         if (op.warning) {
           console.log(chalk.red(`     ⚠️  ${op.warning}`));
         }
@@ -273,7 +294,10 @@ export class DemoUtils {
   /**
    * Ask for confirmation before proceeding
    */
-  static async askConfirmation(message: string, defaultValue: boolean = false): Promise<boolean> {
+  static async askConfirmation(
+    message: string,
+    defaultValue: boolean = false,
+  ): Promise<boolean> {
     const { proceed } = await inquirer.prompt([
       {
         type: 'confirm',
