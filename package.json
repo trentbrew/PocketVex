@@ -40,6 +40,8 @@
     "demo-with-live-pb": "bun run demo-with-live-pb.ts",
     "realtime-migration": "bun run realtime-migration-demo.ts",
     "incremental-migration": "bun run incremental-migration-demo.ts",
+    "js-features": "bun run js-features-demo.ts",
+    "dev-js": "bun run src/dev-server-js.ts",
     "test-connection": "bun run test-connection.ts"
   },
   "dependencies": {
