@@ -43,6 +43,11 @@ export const schema: SchemaDefinition = {
           options: { max: 5000 },
         },
         {
+          name: 'overview',
+          type: 'richText',
+          options: {},
+        },
+        {
           name: 'level',
           type: 'select',
           options: {

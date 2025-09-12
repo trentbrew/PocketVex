@@ -61,6 +61,11 @@ export const schema: SchemaDefinition = {
           name: 'lastLogin',
           type: 'date',
         },
+        {
+          name: 'bio',
+          type: 'richText',
+          options: {},
+        },
       ],
     },
     {
@@ -95,8 +100,8 @@ export const schema: SchemaDefinition = {
         },
         {
           name: 'content',
-          type: 'text',
-          options: { max: 50000 },
+          type: 'richText',
+          options: {},
         },
         {
           name: 'excerpt',
