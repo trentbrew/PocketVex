@@ -1,0 +1,31 @@
+# Source files
+src/
+schema/
+examples/
+pb_migrations/
+templates/
+memory/
+scripts/
+
+# Development files
+demo.ts
+env.example
+.gitignore
+.vscode/
+.github/
+
+# Build artifacts
+node_modules/
+*.log
+*.tgz
+
+# Development dependencies
+.eslintrc*
+tsconfig.json
+bun.lock
+
+# Test files
+test/
+tests/
+*.test.*
+*.spec.*

@@ -2,12 +2,33 @@
   "name": "pocketvex",
   "version": "1.0.0",
   "description": "Schema migration system for PocketBase with real-time development workflow",
-  "module": "index.ts",
+  "main": "dist/lib.js",
+  "module": "dist/lib.js",
+  "types": "dist/lib.d.ts",
   "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/lib.js",
+      "types": "./dist/lib.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types/schema.js",
+      "types": "./dist/types/schema.d.ts"
+    },
+    "./cli": {
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
     "dev": "bun run src/dev-server.ts",
-    "build": "bun build src/index.ts --outdir dist --target bun",
-    "typecheck": "tsc --noEmit",
+    "build": "bun build src/lib.ts --outdir dist --target node --format esm && bun build src/index.ts --outdir dist --target node --format esm && bunx tsc --project tsconfig.build.json --emitDeclarationOnly",
+    "prepublishOnly": "npm run build",
+    "typecheck": "bunx tsc --noEmit",
     "lint": "eslint src --ext .ts",
     "test": "bun test",
     "migrate": "bun run src/cli/migrate.ts",
@@ -42,8 +63,22 @@
     "schema",
     "migration",
     "database",
-    "development"
+    "development",
+    "typescript",
+    "cli",
+    "devtools"
   ],
   "author": "Trent Brew",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/trentbrew/pocketvex.git"
+  },
+  "bugs": {
+    "url": "https://github.com/trentbrew/pocketvex/issues"
+  },
+  "homepage": "https://github.com/trentbrew/pocketvex#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }

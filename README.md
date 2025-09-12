@@ -15,8 +15,28 @@ PocketVex provides a Convex-style development experience for PocketBase, allowin
 
 ## 📦 Installation
 
+### As an npm package (recommended)
+
 ```bash
-# Install dependencies
+# Install globally for CLI usage
+npm install -g pocketvex
+
+# Or install locally in your project
+npm install pocketvex
+
+# Or with yarn
+yarn add pocketvex
+
+# Or with pnpm
+pnpm add pocketvex
+```
+
+### Development setup
+
+```bash
+# Clone and install dependencies
+git clone https://github.com/trentbrew/pocketvex.git
+cd pocketvex
 bun install
 
 # Or with npm
@@ -224,6 +244,51 @@ interface SchemaField {
 ```
 
 ## 🔧 Advanced Usage
+
+### Programmatic Usage
+
+You can also use PocketVex as a library in your Node.js applications:
+
+```typescript
+import { SchemaDiff, PocketBaseClient, DevServer } from 'pocketvex';
+import type { SchemaDefinition } from 'pocketvex';
+
+// Define your schema
+const schema: SchemaDefinition = {
+  collections: [
+    {
+      name: 'users',
+      schema: [
+        { name: 'name', type: 'text', required: true },
+        { name: 'email', type: 'email', required: true, unique: true },
+        { name: 'bio', type: 'editor', options: {} }
+      ]
+    }
+  ]
+};
+
+// Compare schemas
+const currentSchema = await pbClient.fetchCurrentSchema();
+const plan = SchemaDiff.buildDiffPlan(schema, currentSchema);
+
+// Apply safe changes
+for (const operation of plan.safe) {
+  await pbClient.applyOperation(operation);
+}
+
+// Start development server programmatically
+const devServer = new DevServer({
+  url: 'http://localhost:8090',
+  adminEmail: 'admin@example.com',
+  adminPassword: 'admin123',
+  watchPaths: ['schema/**/*.ts'],
+  autoApply: true,
+  generateMigrations: true,
+  migrationPath: './migrations'
+});
+
+await devServer.start();
+```
 
 ### Editor Fields (Rich Text)
 
