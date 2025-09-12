@@ -7,24 +7,24 @@
 export interface PocketBaseApp {
   // App settings and configuration
   settings(): any;
-  
+
   // Database operations
   db(): PocketBaseDB;
-  
+
   // Mailer operations
   newMailClient(): PocketBaseMailer;
-  
+
   // File operations
   newMultipartReader(): any;
   newMultipartWriter(): any;
-  
+
   // Validation
   validate(data: any, rules: any): any;
-  
+
   // Model operations
   save(model: any): Promise<any>;
   delete(model: any): Promise<any>;
-  
+
   // Backup operations
   createBackup(name: string, exclude?: string[]): Promise<any>;
   restoreBackup(name: string, exclude?: string[]): Promise<any>;
@@ -33,19 +33,24 @@ export interface PocketBaseApp {
 export interface PocketBaseDB {
   // Raw SQL queries
   newQuery(sql: string): PocketBaseQuery;
-  
+
   // Collection operations
   findCollectionByNameOrId(nameOrId: string): Promise<PocketBaseCollection>;
   findCollectionsByFilter(filter: string): Promise<PocketBaseCollection[]>;
-  saveCollection(collection: PocketBaseCollection): Promise<PocketBaseCollection>;
+  saveCollection(
+    collection: PocketBaseCollection,
+  ): Promise<PocketBaseCollection>;
   deleteCollection(collection: PocketBaseCollection): Promise<void>;
-  
+
   // Record operations
   findRecordById(collection: string, id: string): Promise<PocketBaseRecord>;
-  findRecordsByFilter(collection: string, filter: string): Promise<PocketBaseRecord[]>;
+  findRecordsByFilter(
+    collection: string,
+    filter: string,
+  ): Promise<PocketBaseRecord[]>;
   saveRecord(record: PocketBaseRecord): Promise<PocketBaseRecord>;
   deleteRecord(record: PocketBaseRecord): Promise<void>;
-  
+
   // Transaction support
   transaction(fn: () => Promise<any>): Promise<any>;
 }
@@ -90,7 +95,7 @@ export interface PocketBaseRecord {
   created: string;
   updated: string;
   [key: string]: any;
-  
+
   // Record methods
   load(): Promise<PocketBaseRecord>;
   save(): Promise<PocketBaseRecord>;
@@ -230,44 +235,154 @@ export interface PocketBaseHooks {
   // App hooks
   onBootstrap(handler: AppHookHandler): void;
   onSettingsReload(handler: AppHookHandler): void;
-  onBackupCreate(handler: (e: PocketBaseEvent & { name: string; exclude?: string[] }) => void): void;
-  onBackupRestore(handler: (e: PocketBaseEvent & { name: string; exclude?: string[] }) => void): void;
-  onTerminate(handler: (e: PocketBaseEvent & { isRestart: boolean }) => void): void;
-  
+  onBackupCreate(
+    handler: (
+      e: PocketBaseEvent & { name: string; exclude?: string[] },
+    ) => void,
+  ): void;
+  onBackupRestore(
+    handler: (
+      e: PocketBaseEvent & { name: string; exclude?: string[] },
+    ) => void,
+  ): void;
+  onTerminate(
+    handler: (e: PocketBaseEvent & { isRestart: boolean }) => void,
+  ): void;
+
   // Mailer hooks
-  onMailerSend(handler: (e: PocketBaseEvent & { mailer: PocketBaseMailer; message: PocketBaseMailMessage }) => void): void;
-  onMailerRecordAuthAlertSend(handler: (e: PocketBaseEvent & { mailer: PocketBaseMailer; message: PocketBaseMailMessage; record: PocketBaseRecord; meta: any }) => void): void;
-  onMailerRecordPasswordResetSend(handler: (e: PocketBaseEvent & { mailer: PocketBaseMailer; message: PocketBaseMailMessage; record: PocketBaseRecord; meta: any }) => void): void;
-  onMailerRecordVerificationSend(handler: (e: PocketBaseEvent & { mailer: PocketBaseMailer; message: PocketBaseMailMessage; record: PocketBaseRecord; meta: any }) => void): void;
-  onMailerRecordEmailChangeSend(handler: (e: PocketBaseEvent & { mailer: PocketBaseMailer; message: PocketBaseMailMessage; record: PocketBaseRecord; meta: any }) => void): void;
-  onMailerRecordOTPSend(handler: (e: PocketBaseEvent & { mailer: PocketBaseMailer; message: PocketBaseMailMessage; record: PocketBaseRecord; meta: any }) => void): void;
-  
+  onMailerSend(
+    handler: (
+      e: PocketBaseEvent & {
+        mailer: PocketBaseMailer;
+        message: PocketBaseMailMessage;
+      },
+    ) => void,
+  ): void;
+  onMailerRecordAuthAlertSend(
+    handler: (
+      e: PocketBaseEvent & {
+        mailer: PocketBaseMailer;
+        message: PocketBaseMailMessage;
+        record: PocketBaseRecord;
+        meta: any;
+      },
+    ) => void,
+  ): void;
+  onMailerRecordPasswordResetSend(
+    handler: (
+      e: PocketBaseEvent & {
+        mailer: PocketBaseMailer;
+        message: PocketBaseMailMessage;
+        record: PocketBaseRecord;
+        meta: any;
+      },
+    ) => void,
+  ): void;
+  onMailerRecordVerificationSend(
+    handler: (
+      e: PocketBaseEvent & {
+        mailer: PocketBaseMailer;
+        message: PocketBaseMailMessage;
+        record: PocketBaseRecord;
+        meta: any;
+      },
+    ) => void,
+  ): void;
+  onMailerRecordEmailChangeSend(
+    handler: (
+      e: PocketBaseEvent & {
+        mailer: PocketBaseMailer;
+        message: PocketBaseMailMessage;
+        record: PocketBaseRecord;
+        meta: any;
+      },
+    ) => void,
+  ): void;
+  onMailerRecordOTPSend(
+    handler: (
+      e: PocketBaseEvent & {
+        mailer: PocketBaseMailer;
+        message: PocketBaseMailMessage;
+        record: PocketBaseRecord;
+        meta: any;
+      },
+    ) => void,
+  ): void;
+
   // Realtime hooks
-  onRealtimeConnectRequest(handler: (e: PocketBaseRequestEvent & { client: PocketBaseRealtimeClient; idleTimeout: number }) => void): void;
-  onRealtimeSubscribeRequest(handler: (e: PocketBaseRequestEvent & { client: PocketBaseRealtimeClient; subscriptions: string[] }) => void): void;
-  onRealtimeMessageSend(handler: (e: PocketBaseRequestEvent & { client: PocketBaseRealtimeClient; message: PocketBaseRealtimeMessage }) => void): void;
-  
+  onRealtimeConnectRequest(
+    handler: (
+      e: PocketBaseRequestEvent & {
+        client: PocketBaseRealtimeClient;
+        idleTimeout: number;
+      },
+    ) => void,
+  ): void;
+  onRealtimeSubscribeRequest(
+    handler: (
+      e: PocketBaseRequestEvent & {
+        client: PocketBaseRealtimeClient;
+        subscriptions: string[];
+      },
+    ) => void,
+  ): void;
+  onRealtimeMessageSend(
+    handler: (
+      e: PocketBaseRequestEvent & {
+        client: PocketBaseRealtimeClient;
+        message: PocketBaseRealtimeMessage;
+      },
+    ) => void,
+  ): void;
+
   // Record hooks
   onRecordEnrich(handler: RecordHookHandler, ...collections: string[]): void;
   onRecordValidate(handler: RecordHookHandler, ...collections: string[]): void;
   onRecordCreate(handler: RecordHookHandler, ...collections: string[]): void;
-  onRecordCreateExecute(handler: RecordHookHandler, ...collections: string[]): void;
-  onRecordAfterCreateSuccess(handler: RecordHookHandler, ...collections: string[]): void;
-  onRecordAfterCreateError(handler: (e: PocketBaseRecordEvent & { error: any }) => void, ...collections: string[]): void;
+  onRecordCreateExecute(
+    handler: RecordHookHandler,
+    ...collections: string[]
+  ): void;
+  onRecordAfterCreateSuccess(
+    handler: RecordHookHandler,
+    ...collections: string[]
+  ): void;
+  onRecordAfterCreateError(
+    handler: (e: PocketBaseRecordEvent & { error: any }) => void,
+    ...collections: string[]
+  ): void;
   onRecordUpdate(handler: RecordHookHandler, ...collections: string[]): void;
-  onRecordUpdateExecute(handler: RecordHookHandler, ...collections: string[]): void;
-  onRecordAfterUpdateSuccess(handler: RecordHookHandler, ...collections: string[]): void;
-  onRecordAfterUpdateError(handler: (e: PocketBaseRecordEvent & { error: any }) => void, ...collections: string[]): void;
+  onRecordUpdateExecute(
+    handler: RecordHookHandler,
+    ...collections: string[]
+  ): void;
+  onRecordAfterUpdateSuccess(
+    handler: RecordHookHandler,
+    ...collections: string[]
+  ): void;
+  onRecordAfterUpdateError(
+    handler: (e: PocketBaseRecordEvent & { error: any }) => void,
+    ...collections: string[]
+  ): void;
   onRecordDelete(handler: RecordHookHandler, ...collections: string[]): void;
-  onRecordDeleteExecute(handler: RecordHookHandler, ...collections: string[]): void;
-  onRecordAfterDeleteSuccess(handler: RecordHookHandler, ...collections: string[]): void;
-  onRecordAfterDeleteError(handler: (e: PocketBaseRecordEvent & { error: any }) => void, ...collections: string[]): void;
-  
+  onRecordDeleteExecute(
+    handler: RecordHookHandler,
+    ...collections: string[]
+  ): void;
+  onRecordAfterDeleteSuccess(
+    handler: RecordHookHandler,
+    ...collections: string[]
+  ): void;
+  onRecordAfterDeleteError(
+    handler: (e: PocketBaseRecordEvent & { error: any }) => void,
+    ...collections: string[]
+  ): void;
+
   // Collection hooks
   onCollectionCreate(handler: CollectionHookHandler): void;
   onCollectionUpdate(handler: CollectionHookHandler): void;
   onCollectionDelete(handler: CollectionHookHandler): void;
-  
+
   // Request hooks
   onRequest(handler: RequestHookHandler): void;
   onResponse(handler: RequestHookHandler): void;
@@ -288,7 +403,10 @@ export interface PocketBaseJSVM {
   };
   $realtime: {
     sendMessage(clientId: string, message: PocketBaseRealtimeMessage): void;
-    broadcast(message: PocketBaseRealtimeMessage, subscriptions?: string[]): void;
+    broadcast(
+      message: PocketBaseRealtimeMessage,
+      subscriptions?: string[],
+    ): void;
   };
   $filesystem: {
     readFile(path: string): Promise<Uint8Array>;

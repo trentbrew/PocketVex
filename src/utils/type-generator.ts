@@ -3,7 +3,11 @@
  * Generates TypeScript types based on PocketBase collections and fields
  */
 
-import type { SchemaDefinition, SchemaCollection, SchemaField } from '../types/schema.js';
+import type {
+  SchemaDefinition,
+  SchemaCollection,
+  SchemaField,
+} from '../types/schema.js';
 
 export class TypeGenerator {
   /**
@@ -14,15 +18,10 @@ export class TypeGenerator {
     const baseTypes = this.generateBaseTypes();
     const collectionTypes = this.generateCollectionTypes(schema);
     const utilityTypes = this.generateUtilityTypes();
-    
-    return [
-      imports,
-      baseTypes,
-      collectionTypes,
-      utilityTypes,
-    ].join('\n\n');
+
+    return [imports, baseTypes, collectionTypes, utilityTypes].join('\n\n');
   }
-  
+
   /**
    * Generate import statements
    */
@@ -32,9 +31,9 @@ export class TypeGenerator {
  * Auto-generated from schema definition
  */
 
-import type { PocketBaseRecord } from './pocketbase-js.js';`;
+import type { PocketBaseRecord } from 'pocketvex/types';`;
   }
-  
+
   /**
    * Generate base types
    */
@@ -54,20 +53,22 @@ export interface AuthRecord extends BaseRecord {
   lastVerificationSentAt?: string;
 }`;
   }
-  
+
   /**
    * Generate collection-specific types
    */
   private static generateCollectionTypes(schema: SchemaDefinition): string {
     const types: string[] = [];
-    
+
     for (const collection of schema.collections) {
       const typeName = this.toPascalCase(collection.name);
       const fields = this.generateFieldTypes(collection.schema || []);
       const rules = this.generateRuleTypes(collection.rules);
-      
+
       types.push(`// ${collection.name} collection
-export interface ${typeName}Record extends ${collection.type === 'auth' ? 'AuthRecord' : 'BaseRecord'} {
+export interface ${typeName}Record extends ${
+        collection.type === 'auth' ? 'AuthRecord' : 'BaseRecord'
+      } {
 ${fields}
 }
 
@@ -83,48 +84,48 @@ export interface ${typeName}Rules {
 ${rules}
 }`);
     }
-    
+
     return types.join('\n\n');
   }
-  
+
   /**
    * Generate field types for a collection
    */
   private static generateFieldTypes(fields: SchemaField[]): string {
     return fields
-      .map(field => {
+      .map((field) => {
         const type = this.getTypeScriptType(field);
         const optional = field.required ? '' : '?';
         return `  ${field.name}${optional}: ${type};`;
       })
       .join('\n');
   }
-  
+
   /**
    * Generate create fields (all optional except required)
    */
   private static generateCreateFields(fields: SchemaField[]): string {
     return fields
-      .map(field => {
+      .map((field) => {
         const type = this.getTypeScriptType(field);
         const optional = field.required ? '' : '?';
         return `  ${field.name}${optional}: ${type};`;
       })
       .join('\n');
   }
-  
+
   /**
    * Generate update fields (all optional)
    */
   private static generateUpdateFields(fields: SchemaField[]): string {
     return fields
-      .map(field => {
+      .map((field) => {
         const type = this.getTypeScriptType(field);
         return `  ${field.name}?: ${type};`;
       })
       .join('\n');
   }
-  
+
   /**
    * Generate rule types
    */
@@ -136,12 +137,12 @@ ${rules}
   update?: string;
   delete?: string;`;
     }
-    
+
     return Object.entries(rules)
       .map(([key, value]) => `  ${key}?: string;`)
       .join('\n');
   }
-  
+
   /**
    * Generate utility types
    */
@@ -167,7 +168,7 @@ export interface PocketBaseListParams {
 // Collection name to type mapping
 export type CollectionName = ${this.generateCollectionNames()};
 
-export type CollectionRecord<T extends CollectionName> = 
+export type CollectionRecord<T extends CollectionName> =
 ${this.generateCollectionRecordMapping()};
 
 // API client types
@@ -187,7 +188,7 @@ export interface PocketBaseCollection<T extends CollectionName> {
   subscribeList(callback: (data: any) => void): () => void;
 }`;
   }
-  
+
   /**
    * Generate collection names union type
    */
@@ -195,7 +196,7 @@ export interface PocketBaseCollection<T extends CollectionName> {
     // This would be populated from the actual schema
     return `'users' | 'posts' | 'comments' | 'courses' | 'modules' | 'lessons'`;
   }
-  
+
   /**
    * Generate collection record mapping
    */
@@ -208,17 +209,17 @@ export interface PocketBaseCollection<T extends CollectionName> {
   T extends 'lessons' ? LessonsRecord :
   never;`;
   }
-  
+
   /**
    * Convert string to PascalCase
    */
   private static toPascalCase(str: string): string {
     return str
       .split(/[-_\s]+/)
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join('');
   }
-  
+
   /**
    * Get TypeScript type for a field
    */
@@ -229,33 +230,33 @@ export interface PocketBaseCollection<T extends CollectionName> {
       case 'url':
       case 'select':
         return 'string';
-      
+
       case 'number':
         return 'number';
-      
+
       case 'bool':
         return 'boolean';
-      
+
       case 'date':
         return 'string'; // ISO date string
-      
+
       case 'json':
         return 'any';
-      
+
       case 'file':
         return 'string | string[]'; // File URLs
-      
+
       case 'relation':
         return 'string'; // Related record ID
-      
+
       case 'editor':
         return 'string'; // HTML content
-      
+
       default:
         return 'any';
     }
   }
-  
+
   /**
    * Generate types for a specific collection
    */
@@ -263,8 +264,10 @@ export interface PocketBaseCollection<T extends CollectionName> {
     const typeName = this.toPascalCase(collection.name);
     const fields = this.generateFieldTypes(collection.schema || []);
     const rules = this.generateRuleTypes(collection.rules);
-    
-    return `export interface ${typeName}Record extends ${collection.type === 'auth' ? 'AuthRecord' : 'BaseRecord'} {
+
+    return `export interface ${typeName}Record extends ${
+      collection.type === 'auth' ? 'AuthRecord' : 'BaseRecord'
+    } {
 ${fields}
 }
 
@@ -280,13 +283,13 @@ export interface ${typeName}Rules {
 ${rules}
 }`;
   }
-  
+
   /**
    * Generate API client code
    */
   static generateApiClient(schema: SchemaDefinition): string {
     const collectionMethods = schema.collections
-      .map(collection => {
+      .map((collection) => {
         const typeName = this.toPascalCase(collection.name);
         return `  ${collection.name}: {
     getList: (params?: PocketBaseListParams) => Promise<PocketBaseResponse<${typeName}Record>>;
@@ -301,7 +304,7 @@ ${rules}
   };`;
       })
       .join('\n');
-    
+
     return `// Generated API client
 export interface PocketBaseAPI {
 ${collectionMethods}

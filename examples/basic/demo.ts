@@ -5,9 +5,9 @@
  */
 
 import chalk from 'chalk';
-import { SchemaDiff } from './src/utils/diff.js';
-import { schema as exampleSchema } from './src/schema/example.js';
-import { schema as exampleSchema2 } from './schema/example.schema.js';
+import { SchemaDiff } from '../../src/utils/diff.js';
+import { schema as exampleSchema } from '../../src/schema/example.js';
+import { schema as exampleSchema2 } from '../../schema/example.schema.js';
 
 console.log(chalk.blue('🚀 PocketVex Schema Migration System Demo\n'));
 

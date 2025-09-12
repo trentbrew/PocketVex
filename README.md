@@ -125,6 +125,7 @@ bun run dev-js
 ```
 
 This demo showcases:
+
 - Event hooks for custom business logic
 - Scheduled jobs (CRON) for automation
 - Console commands for database management
@@ -478,27 +479,27 @@ Define custom business logic with event hooks:
 ```javascript
 // pb_hooks/user-hooks.js
 $hooks.onRecordAfterCreateSuccess((e) => {
-  console.log(`New user registered: ${e.record.get("email")}`);
-  
+  console.log(`New user registered: ${e.record.get('email')}`);
+
   // Send welcome email
   const mailer = $app.newMailClient();
   mailer.send({
-    from: "noreply@example.com",
-    to: [e.record.get("email")],
-    subject: "Welcome!",
-    html: `<h1>Welcome ${e.record.get("name")}!</h1>`
+    from: 'noreply@example.com',
+    to: [e.record.get('email')],
+    subject: 'Welcome!',
+    html: `<h1>Welcome ${e.record.get('name')}!</h1>`,
   });
-}, "users");
+}, 'users');
 
 $hooks.onRecordValidate((e) => {
-  if (e.record.collectionName === "posts") {
-    const title = e.record.get("title");
+  if (e.record.collectionName === 'posts') {
+    const title = e.record.get('title');
     if (!title || title.length < 5) {
-      throw new Error("Post title must be at least 5 characters");
+      throw new Error('Post title must be at least 5 characters');
     }
   }
   e.next();
-}, "posts");
+}, 'posts');
 ```
 
 ### ⏰ Scheduled Jobs (CRON)
@@ -508,18 +509,23 @@ Create automated background tasks:
 ```javascript
 // pb_jobs/daily-cleanup.js
 $jobs.register({
-  name: "daily_cleanup",
-  cron: "0 2 * * *", // Every day at 2 AM
+  name: 'daily_cleanup',
+  cron: '0 2 * * *', // Every day at 2 AM
   handler: async (e) => {
     // Clean up old sessions
-    await $app.db().newQuery(`
-      DELETE FROM _sessions 
+    await $app
+      .db()
+      .newQuery(
+        `
+      DELETE FROM _sessions
       WHERE created < datetime('now', '-30 days')
-    `).execute();
-    
-    console.log("Daily cleanup completed");
+    `,
+      )
+      .execute();
+
+    console.log('Daily cleanup completed');
     e.next();
-  }
+  },
 });
 ```
 
@@ -530,17 +536,17 @@ Add custom CLI commands:
 ```javascript
 // pb_commands/user-management.js
 $commands.register({
-  name: "user:create",
-  description: "Create a new user",
+  name: 'user:create',
+  description: 'Create a new user',
   handler: async (e) => {
-    const user = $app.db().newRecord("users");
-    user.set("email", "newuser@example.com");
-    user.set("name", "New User");
+    const user = $app.db().newRecord('users');
+    user.set('email', 'newuser@example.com');
+    user.set('name', 'New User');
     await $app.save(user);
-    
-    console.log("User created successfully");
+
+    console.log('User created successfully');
     e.next();
-  }
+  },
 });
 ```
 
@@ -551,13 +557,18 @@ Perform advanced database operations:
 ```javascript
 // pb_queries/analytics.js
 const getUserStats = async () => {
-  const stats = await $app.db().newQuery(`
-    SELECT 
+  const stats = await $app
+    .db()
+    .newQuery(
+      `
+    SELECT
       COUNT(*) as total_users,
       COUNT(CASE WHEN created > datetime('now', '-30 days') THEN 1 END) as new_users
     FROM users
-  `).one();
-  
+  `,
+    )
+    .one();
+
   return stats;
 };
 ```
@@ -585,7 +596,9 @@ export interface PostsRecord extends BaseRecord {
 // generated/api-client.ts (auto-generated)
 export interface PocketBaseAPI {
   users: {
-    getList: (params?: PocketBaseListParams) => Promise<PocketBaseResponse<UsersRecord>>;
+    getList: (
+      params?: PocketBaseListParams,
+    ) => Promise<PocketBaseResponse<UsersRecord>>;
     getOne: (id: string) => Promise<UsersRecord>;
     create: (data: UsersCreate) => Promise<UsersRecord>;
     update: (id: string, data: UsersUpdate) => Promise<UsersRecord>;
@@ -608,7 +621,7 @@ export interface PocketBaseAPI {
 
 - **`$app`** - Main application instance
 - **`$hooks`** - Event hook registration
-- **`$jobs`** - Scheduled job registration  
+- **`$jobs`** - Scheduled job registration
 - **`$commands`** - Console command registration
 - **`$http`** - HTTP request client
 - **`$realtime`** - Realtime messaging

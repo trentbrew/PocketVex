@@ -7,9 +7,9 @@
 import chalk from 'chalk';
 import ora from 'ora';
 import inquirer from 'inquirer';
-import { SchemaDiff } from './src/utils/diff.js';
-import { PocketBaseClient } from './src/utils/pocketbase.js';
-import { schema as exampleSchema } from './src/schema/example.js';
+import { SchemaDiff } from '../../src/utils/diff.js';
+import { PocketBaseClient } from '../../src/utils/pocketbase.js';
+import { schema as exampleSchema } from '../../src/schema/example.js';
 
 // Live PocketBase configuration
 const LIVE_CONFIG = {

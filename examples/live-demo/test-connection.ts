@@ -6,7 +6,7 @@
 
 import chalk from 'chalk';
 import ora from 'ora';
-import { PocketBaseClient } from './src/utils/pocketbase.js';
+import { PocketBaseClient } from '../../src/utils/pocketbase.js';
 
 const LIVE_CONFIG = {
   url: 'https://pocketvex.pockethost.io',

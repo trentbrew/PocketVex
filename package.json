@@ -17,8 +17,8 @@
       "types": "./dist/lib.d.ts"
     },
     "./types": {
-      "import": "./dist/types/schema.js",
-      "types": "./dist/types/schema.d.ts"
+      "import": "./dist/types/pocketbase-js.js",
+      "types": "./dist/types/pocketbase-js.d.ts"
     },
     "./cli": {
       "import": "./dist/index.js"
@@ -26,23 +26,23 @@
   },
   "scripts": {
     "dev": "bun run src/dev-server.ts",
-    "build": "bun build src/lib.ts --outdir dist --target node --format esm && bun build src/index.ts --outdir dist --target node --format esm && bunx tsc --project tsconfig.build.json --emitDeclarationOnly",
+    "build": "bun build src/lib.ts --outdir dist --target node --format esm && bun build src/index.ts --outdir dist --target node --format esm && bunx tsc --project config/tsconfig.build.json --emitDeclarationOnly",
     "prepublishOnly": "npm run build",
-    "typecheck": "bunx tsc --noEmit",
+    "typecheck": "bunx tsc --project config/tsconfig.json --noEmit",
     "lint": "eslint src --ext .ts",
     "test": "bun test",
     "migrate": "bun run src/cli/migrate.ts",
     "schema:watch": "bun run src/dev-server.ts --watch",
     "schema:apply": "bun run src/cli/apply.ts",
     "schema:diff": "bun run src/cli/diff.ts",
-    "demo": "bun run demo.ts",
-    "live-demo": "bun run live-demo.ts",
-    "demo-with-live-pb": "bun run demo-with-live-pb.ts",
-    "realtime-migration": "bun run realtime-migration-demo.ts",
-    "incremental-migration": "bun run incremental-migration-demo.ts",
-    "js-features": "bun run js-features-demo.ts",
+    "demo": "bun run examples/basic/demo.ts",
+    "live-demo": "bun run examples/live-demo/live-demo.ts",
+    "demo-with-live-pb": "bun run examples/live-demo/demo-with-live-pb.ts",
+    "realtime-migration": "bun run examples/live-demo/realtime-migration-demo.ts",
+    "incremental-migration": "bun run examples/live-demo/incremental-migration-demo.ts",
+    "js-features": "bun run examples/javascript-vm/js-features-demo.ts",
     "dev-js": "bun run src/dev-server-js.ts",
-    "test-connection": "bun run test-connection.ts"
+    "test-connection": "bun run examples/live-demo/test-connection.ts"
   },
   "dependencies": {
     "pocketbase": "^0.21.1",

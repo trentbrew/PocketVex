@@ -6,9 +6,9 @@
 
 import chalk from 'chalk';
 import ora from 'ora';
-import { SchemaDiff } from './src/utils/diff.js';
-import { PocketBaseClient } from './src/utils/pocketbase.js';
-import { schema as exampleSchema } from './src/schema/example.js';
+import { SchemaDiff } from '../../src/utils/diff.js';
+import { PocketBaseClient } from '../../src/utils/pocketbase.js';
+import { schema as exampleSchema } from '../../src/schema/example.js';
 
 console.log(chalk.blue('🚀 PocketVex Demo with Live PocketBase Integration\n'));
 

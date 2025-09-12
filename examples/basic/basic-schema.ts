@@ -3,7 +3,7 @@
  * Demonstrates common patterns and best practices
  */
 
-import type { SchemaDefinition } from '../src/types/schema.js';
+import type { SchemaDefinition } from '../../src/types/schema.js';
 
 export const schema: SchemaDefinition = {
   collections: [

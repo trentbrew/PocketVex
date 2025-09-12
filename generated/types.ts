@@ -3,7 +3,7 @@
  * Auto-generated from schema definition
  */
 
-import type { PocketBaseRecord } from './pocketbase-js.js';
+import type { PocketBaseRecord } from 'pocketvex/types';
 
 // Base PocketBase types
 export interface BaseRecord {
@@ -158,7 +158,7 @@ export interface PocketBaseListParams {
 // Collection name to type mapping
 export type CollectionName = 'users' | 'posts' | 'comments' | 'courses' | 'modules' | 'lessons';
 
-export type CollectionRecord<T extends CollectionName> = 
+export type CollectionRecord<T extends CollectionName> =
   T extends 'users' ? UsersRecord :
   T extends 'posts' ? PostsRecord :
   T extends 'comments' ? CommentsRecord :
