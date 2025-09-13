@@ -23,7 +23,7 @@ PocketVex provides a Convex-style development experience for PocketBase, allowin
 
 ## 📦 Installation
 
-Use the Node-based CLI (no Bun required for end users):
+Use the Node-based CLI (no Bun required for end users). **Requires Node ≥ 18**.
 
 ```bash
 # zero-install CLI
@@ -599,6 +599,8 @@ Rules use PocketBase's expression syntax with access to:
 - **`@request.info`**: Request metadata (IP, user agent, etc.)
 
 ### Common Rule Patterns
+
+> Note: examples using `@request.auth.role` assume your auth collection has a custom `role` field.
 
 ```typescript
 // Public access (anyone can read, only authenticated users can write)
