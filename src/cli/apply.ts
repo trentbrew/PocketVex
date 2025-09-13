@@ -10,7 +10,7 @@ import ora from 'ora';
 import inquirer from 'inquirer';
 import { SchemaDiff } from '../utils/diff.js';
 import { PocketBaseClient } from '../utils/pocketbase.js';
-import { schema as exampleSchema } from '../schema/example.js';
+import { schema as exampleSchema } from '../pocketvex/schema/example.schema.ts';
 
 const program = new Command();
 

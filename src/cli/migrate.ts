@@ -11,7 +11,7 @@ import { readdir, readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { SchemaDiff } from '../utils/diff.js';
 import { PocketBaseClient } from '../utils/pocketbase.js';
-import { schema as exampleSchema } from '../schema/example.js';
+import { schema as exampleSchema } from '../pocketvex/schema/example.schema.ts';
 
 const program = new Command();
 

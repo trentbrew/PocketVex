@@ -13,7 +13,34 @@ import { PocketBaseClient } from '../utils/pocketbase.js';
 import { TypeGenerator } from '../utils/type-generator.js';
 import { credentialStore } from '../utils/credential-store.js';
 import { startDevServer } from '../dev-server.js';
-import { schema as exampleSchema } from '../schema/example.js';
+// import { schema as exampleSchema } from '../pocketvex/schema/example.schema.ts';
+
+// Temporary schema for CLI commands
+const exampleSchema = {
+  collections: [
+    {
+      name: 'users',
+      type: 'base' as const,
+      schema: [
+        { name: 'name', type: 'text' as const, required: true },
+        { name: 'email', type: 'email' as const, required: true, unique: true },
+        { name: 'avatar', type: 'file' as const },
+        { name: 'created', type: 'date' as const, required: true },
+      ],
+    },
+    {
+      name: 'posts',
+      type: 'base' as const,
+      schema: [
+        { name: 'title', type: 'text' as const, required: true },
+        { name: 'content', type: 'editor' as const, required: true },
+        { name: 'author', type: 'relation' as const, options: { collectionId: 'users' } },
+        { name: 'published', type: 'bool' as const, required: true },
+        { name: 'tags', type: 'select' as const, options: { values: ['tech', 'life', 'work'] } },
+      ],
+    },
+  ],
+};
 import { getPocketVexConfig } from '../config/pocketvex-config.js';
 
 // Utility function to collect host and credentials
@@ -109,12 +136,20 @@ program
   .action(() => {
     const config = getPocketVexConfig();
     const configData = config.getConfig();
-    
+
     console.log(chalk.blue('📋 PocketVex Configuration:'));
     console.log(chalk.gray('─────────────────────────'));
     console.log(chalk.white(`Directory: ${chalk.green(configData.directory)}`));
-    console.log(chalk.white(`Use PocketVex Directory: ${chalk.green(configData.usePocketVexDirectory)}`));
-    console.log(chalk.white(`Use PB Prefixes: ${chalk.green(configData.usePbPrefixes)}`));
+    console.log(
+      chalk.white(
+        `Use PocketVex Directory: ${chalk.green(
+          configData.usePocketVexDirectory,
+        )}`,
+      ),
+    );
+    console.log(
+      chalk.white(`Use PB Prefixes: ${chalk.green(configData.usePbPrefixes)}`),
+    );
     console.log(chalk.gray('─────────────────────────'));
     console.log(chalk.blue('📁 Directory Structure:'));
     console.log(chalk.gray(`Schema: ${config.getSchemaDirectory()}`));

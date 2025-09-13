@@ -25,7 +25,7 @@ export class PocketVexConfigManager {
 
   private loadConfig(projectRoot: string): PocketVexConfig {
     const configPath = join(projectRoot, 'pocketvex.config.json');
-    
+
     if (existsSync(configPath)) {
       try {
         const configData = JSON.parse(readFileSync(configPath, 'utf-8'));
@@ -107,17 +107,17 @@ export class PocketVexConfigManager {
 
   getWatchPatterns(): string[] {
     const patterns: string[] = [];
-    
+
     // Schema files
     patterns.push(`${this.getSchemaDirectory()}/**/*.ts`);
     patterns.push(`${this.getSchemaDirectory()}/**/*.js`);
-    
+
     // JavaScript VM files
     patterns.push(`${this.getJobsDirectory()}/**/*.js`);
     patterns.push(`${this.getHooksDirectory()}/**/*.js`);
     patterns.push(`${this.getCommandsDirectory()}/**/*.js`);
     patterns.push(`${this.getQueriesDirectory()}/**/*.js`);
-    
+
     return patterns;
   }
 
@@ -133,7 +133,9 @@ export class PocketVexConfigManager {
 // Singleton instance
 let configManager: PocketVexConfigManager | null = null;
 
-export function getPocketVexConfig(projectRoot?: string): PocketVexConfigManager {
+export function getPocketVexConfig(
+  projectRoot?: string,
+): PocketVexConfigManager {
   if (!configManager) {
     configManager = new PocketVexConfigManager(projectRoot);
   }

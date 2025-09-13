@@ -40,18 +40,20 @@ my-project/
 ## 🔧 Configuration Options
 
 ### `pocketvex.config.json`
+
 ```json
 {
-  "directory": "pocketvex",           // Custom directory name
-  "usePocketVexDirectory": true,      // Use new structure
-  "usePbPrefixes": false              // No pb_ prefixes
+  "directory": "pocketvex", // Custom directory name
+  "usePocketVexDirectory": true, // Use new structure
+  "usePbPrefixes": false // No pb_ prefixes
 }
 ```
 
 ### Custom Directory Example
+
 ```json
 {
-  "directory": "src/pocketbase",      // Custom location
+  "directory": "src/pocketbase", // Custom location
   "usePocketVexDirectory": true,
   "usePbPrefixes": false
 }
@@ -60,15 +62,17 @@ my-project/
 ## 🔄 Legacy Structure Support
 
 ### Legacy Mode (Backward Compatible)
+
 ```json
 {
   "directory": "pocketvex",
-  "usePocketVexDirectory": false,     // Use legacy structure
-  "usePbPrefixes": true               // Keep pb_ prefixes
+  "usePocketVexDirectory": false, // Use legacy structure
+  "usePbPrefixes": true // Keep pb_ prefixes
 }
 ```
 
 **Legacy Structure:**
+
 ```
 my-project/
 ├── 📋 schema/                       # Schema definitions
@@ -83,21 +87,25 @@ my-project/
 ## 🎯 Benefits of New Structure
 
 ### ✅ **Cleaner Organization**
+
 - All PocketVex files in one directory
 - No confusing `pb_` prefixes
 - Similar to Convex's `/convex` structure
 
 ### ✅ **Configurable Location**
+
 - Default: `/pocketvex` in project root
 - Custom: Any directory (e.g., `src/pocketbase`)
 - Backward compatible with legacy structure
 
 ### ✅ **Better Developer Experience**
+
 - Clear separation of concerns
 - Easier to find related files
 - Consistent naming conventions
 
 ### ✅ **Migration Path**
+
 - Automatic detection of existing structure
 - Gradual migration support
 - No breaking changes
@@ -105,6 +113,7 @@ my-project/
 ## 🚀 Getting Started
 
 ### 1. **New Project (Recommended)**
+
 ```bash
 # Create new project
 mkdir my-project && cd my-project
@@ -117,6 +126,7 @@ npx pocketvex init
 ```
 
 ### 2. **Existing Project Migration**
+
 ```bash
 # PocketVex automatically detects existing structure
 # and provides migration guidance
@@ -132,6 +142,7 @@ mv pb_migrations pocketvex/migrations
 ```
 
 ### 3. **Custom Directory Setup**
+
 ```bash
 # Create custom directory
 mkdir src/pocketbase
@@ -147,6 +158,7 @@ echo '{
 ## 📝 File Examples
 
 ### Schema File
+
 ```typescript
 // pocketvex/schema/users.schema.ts
 import type { SchemaDefinition } from 'pocketvex/types';
@@ -166,6 +178,7 @@ export const usersSchema: SchemaDefinition = {
 ```
 
 ### CRON Job
+
 ```javascript
 // pocketvex/jobs/cleanup.js
 $jobs.register('cleanup', '0 2 * * * *', async (cron) => {
@@ -175,6 +188,7 @@ $jobs.register('cleanup', '0 2 * * * *', async (cron) => {
 ```
 
 ### Event Hook
+
 ```javascript
 // pocketvex/hooks/user-hooks.js
 $app.onRecordCreate('users', async (e) => {
@@ -184,6 +198,7 @@ $app.onRecordCreate('users', async (e) => {
 ```
 
 ### Console Command
+
 ```javascript
 // pocketvex/commands/seed.js
 $app.command('seed', async (cmd) => {
@@ -195,24 +210,28 @@ $app.command('seed', async (cmd) => {
 ## 🔄 Development Workflow
 
 ### 1. **Start Development Server**
+
 ```bash
 npm run dev
 # Watches: pocketvex/**/*.ts, pocketvex/**/*.js
 ```
 
 ### 2. **Schema Changes**
+
 ```typescript
 // Edit: pocketvex/schema/users.schema.ts
 // PocketVex automatically detects and applies changes
 ```
 
 ### 3. **JavaScript VM Changes**
+
 ```javascript
 // Edit: pocketvex/jobs/cleanup.js
 // PocketVex shows deployment instructions
 ```
 
 ### 4. **Type Generation**
+
 ```bash
 npm run types:generate
 # Updates: generated/types.ts
