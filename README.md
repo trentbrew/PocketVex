@@ -259,13 +259,14 @@ When you start the dev server, PocketVex scans for JavaScript VM files:
 JavaScript VM files need to be manually deployed to PocketBase:
 
 1. **Copy files to PocketBase instance:**
+
    ```bash
    # Copy CRON jobs
    cp pb_jobs/*.js /path/to/pocketbase/pb_jobs/
-   
+
    # Copy hooks
    cp pb_hooks/*.js /path/to/pocketbase/pb_hooks/
-   
+
    # Copy commands
    cp pb_commands/*.js /path/to/pocketbase/pb_commands/
    ```

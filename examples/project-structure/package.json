@@ -1,0 +1,35 @@
+{
+  "name": "my-pocketbase-app",
+  "version": "1.0.0",
+  "description": "Example PocketBase app using PocketVex",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "pocketvex dev",
+    "dev:once": "pocketvex dev --once",
+    "schema:diff": "pocketvex schema diff",
+    "schema:apply": "pocketvex schema apply",
+    "migrate:up": "pocketvex migrate up",
+    "migrate:down": "pocketvex migrate down",
+    "types:generate": "pocketvex types generate",
+    "setup": "pocketvex setup",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "pocketvex": "^1.0.0",
+    "pocketbase": "^0.21.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  },
+  "keywords": [
+    "pocketbase",
+    "pocketvex",
+    "schema",
+    "migration",
+    "typescript"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

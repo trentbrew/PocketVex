@@ -273,7 +273,11 @@ export class PocketBaseClient {
    * Deploy a JavaScript file to PocketBase's filesystem
    * This is used for deploying JavaScript VM files
    */
-  async deployJavaScriptFile(fileName: string, content: string, directory: string): Promise<any> {
+  async deployJavaScriptFile(
+    fileName: string,
+    content: string,
+    directory: string,
+  ): Promise<any> {
     try {
       // Create a FormData object with the file content
       const formData = new FormData();
@@ -281,30 +285,47 @@ export class PocketBaseClient {
       formData.append('file', blob, fileName);
 
       // Upload the file to PocketBase's filesystem
-      const response = await this.pb.send(`/api/files/${directory}/${fileName}`, {
-        method: 'POST',
-        body: formData,
-      });
+      const response = await this.pb.send(
+        `/api/files/${directory}/${fileName}`,
+        {
+          method: 'POST',
+          body: formData,
+        },
+      );
 
       return response;
     } catch (error) {
       // If file upload fails, try alternative approach
-      throw new Error(`Failed to deploy JavaScript file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to deploy JavaScript file: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      );
     }
   }
 
   /**
    * Remove a JavaScript file from PocketBase's filesystem
    */
-  async removeJavaScriptFile(fileName: string, directory: string): Promise<any> {
+  async removeJavaScriptFile(
+    fileName: string,
+    directory: string,
+  ): Promise<any> {
     try {
-      const response = await this.pb.send(`/api/files/${directory}/${fileName}`, {
-        method: 'DELETE',
-      });
+      const response = await this.pb.send(
+        `/api/files/${directory}/${fileName}`,
+        {
+          method: 'DELETE',
+        },
+      );
 
       return response;
     } catch (error) {
-      throw new Error(`Failed to remove JavaScript file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to remove JavaScript file: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      );
     }
   }
 }

@@ -316,7 +316,9 @@ export class DevServer {
     console.log(chalk.blue(`📝 JS VM file ready: ${fileName}`));
     console.log(chalk.gray(`   Directory: ${targetDir}/`));
     console.log(chalk.gray(`   Path: ${relativePath}`));
-    console.log(chalk.gray(`   📋 To deploy: Copy this file to your PocketBase instance`));
+    console.log(
+      chalk.gray(`   📋 To deploy: Copy this file to your PocketBase instance`),
+    );
     console.log(chalk.gray(`   📖 See README.md for deployment instructions`));
   }
 
@@ -355,11 +357,13 @@ export class DevServer {
     }
 
     if (foundCount > 0) {
+      console.log(chalk.green(`✅ Found ${foundCount} JavaScript VM files`));
       console.log(
-        chalk.green(`✅ Found ${foundCount} JavaScript VM files`),
+        chalk.gray('   📋 Files are ready for manual deployment to PocketBase'),
       );
-      console.log(chalk.gray('   📋 Files are ready for manual deployment to PocketBase'));
-      console.log(chalk.gray('   📖 See README.md for deployment instructions'));
+      console.log(
+        chalk.gray('   📖 See README.md for deployment instructions'),
+      );
     } else {
       console.log(chalk.gray('ℹ️  No JavaScript VM files found'));
     }
@@ -389,7 +393,9 @@ export class DevServer {
     console.log(chalk.yellow(`🗑️  JS VM file removed: ${fileName}`));
     console.log(chalk.gray(`   Directory: ${targetDir}/`));
     console.log(chalk.gray(`   Path: ${relativePath}`));
-    console.log(chalk.gray(`   📋 Remember to remove from your PocketBase instance`));
+    console.log(
+      chalk.gray(`   📋 Remember to remove from your PocketBase instance`),
+    );
   }
 
   /**
