@@ -9,6 +9,7 @@
   "files": [
     "dist",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "exports": {
@@ -20,12 +21,24 @@
       "import": "./dist/types/pocketbase-js.js",
       "types": "./dist/types/pocketbase-js.d.ts"
     },
+    "./types/schema-strict": {
+      "import": "./dist/types/schema-strict.js",
+      "types": "./dist/types/schema-strict.d.ts"
+    },
+    "./types/migration": {
+      "import": "./dist/types/migration.js",
+      "types": "./dist/types/migration.d.ts"
+    },
+    "./config": {
+      "import": "./dist/config/index.js",
+      "types": "./dist/config/index.d.ts"
+    },
     "./cli": {
       "import": "./dist/cli/index.js"
     }
   },
   "scripts": {
-    "build": "rm -rf dist && bun build src/lib.ts --outdir dist --target node --format esm && bun build src/index.ts --outdir dist/cli --target node --format esm && bun build src/types/pocketbase-js.ts --outdir dist/types --target node --format esm && node scripts/fix-shebang.mjs && bunx tsc --project config/tsconfig.build.json --emitDeclarationOnly",
+    "build": "rm -rf dist && bun build src/lib.ts --outdir dist --target node --format esm && bun build src/index.ts --outdir dist/cli --target node --format esm && bun build src/types/pocketbase-js.ts --outdir dist/types --target node --format esm && bun build src/types/schema-strict.ts --outdir dist/types --target node --format esm && bun build src/types/migration.ts --outdir dist/types --target node --format esm && bun build src/config/index.ts --outdir dist/config --target node --format esm && node scripts/fix-shebang.mjs && bunx tsc --project config/tsconfig.build.json --emitDeclarationOnly",
     "prepublishOnly": "npm run build",
     "typecheck": "bunx tsc --project config/tsconfig.json --noEmit",
     "lint": "eslint src --ext .ts",
@@ -50,6 +63,7 @@
     "demo:cron": "bun run examples/javascript-vm/cron-demo.ts",
     "demo:basic-cron": "bun run examples/javascript-vm/basic-cron-demo.ts",
     "demo:auto-deploy": "bun run examples/javascript-vm/auto-deployment-demo.ts",
+    "check:pack": "npm pack --dry-run",
     "demo:host-selection": "bun run examples/host-selection-demo.ts",
     "demo:project-structure": "cat examples/project-structure/README.md",
     "demo:frontend-svelte": "cat examples/project-structure/frontend-svelte/README.md",
@@ -57,6 +71,7 @@
     "demo:test": "bun run examples/live-demo/test-connection.ts",
     "dev-js": "bun run src/dev-server-js.ts"
   },
+  "sideEffects": false,
   "dependencies": {
     "pocketbase": "^0.21.1",
     "chokidar": "^3.5.3",

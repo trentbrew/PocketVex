@@ -11,7 +11,10 @@
     "../src/utils/diff.ts",
     "../src/utils/rules.ts",
     "../src/types/schema.ts",
-    "../src/types/pocketbase-js.ts"
+    "../src/types/pocketbase-js.ts",
+    "../src/types/schema-strict.ts",
+    "../src/types/migration.ts",
+    "../src/config/index.ts"
   ],
   "exclude": [
     "../node_modules",
