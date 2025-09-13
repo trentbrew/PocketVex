@@ -566,6 +566,57 @@ export PB_ADMIN_PASS="secure_password"
 4. Add tests
 5. Submit a pull request
 
+## ⏰ CRON Job Scheduling
+
+PocketVex includes comprehensive CRON job examples and demos for PocketBase's JavaScript VM scheduling capabilities:
+
+### **Available CRON Patterns:**
+- **Every minute**: `0 * * * * *` - Session cleanup, real-time monitoring
+- **Every 5 minutes**: `0 */5 * * * *` - Email processing, task queues
+- **Every hour**: `0 0 * * * *` - Analytics generation, data aggregation
+- **Daily at midnight**: `0 0 0 * * *` - Data archiving, cleanup tasks
+- **Weekly on Monday**: `0 0 9 * * 1` - Weekly reports, maintenance
+- **Business hours**: `0 */15 9-17 * * 1-5` - Health monitoring, alerts
+- **High frequency**: `*/30 * * * * *` - Real-time task processing
+
+### **CRON Job Examples:**
+```bash
+# Run CRON jobs demo
+bun run demo:cron
+
+# Or through the main demo
+bun run demo
+# Select "⏰ CRON Jobs Demo"
+```
+
+### **Example CRON Jobs:**
+- **Session Cleanup**: Automatically remove expired user sessions
+- **Analytics Generation**: Create hourly/daily/weekly analytics reports
+- **Email Processing**: Process queued emails with error handling
+- **Health Monitoring**: Monitor system health during business hours
+- **Data Archiving**: Archive old logs and data for performance
+- **Task Processing**: Handle background tasks and notifications
+- **Weekly Reports**: Generate and send automated reports
+
+### **Implementation:**
+1. Create JavaScript files in `pb_jobs/` directory
+2. Use `$jobs.register()` to define scheduled jobs
+3. Deploy to your PocketBase instance
+4. Monitor execution in PocketBase logs
+
+```javascript
+// Example: Session cleanup every minute
+$jobs.register('session-cleanup', '0 * * * * *', async (cron) => {
+  const expiredSessions = await $app.db().newQuery('sessions')
+    .filter('expires < {:now}', { now: new Date() })
+    .all();
+    
+  for (const session of expiredSessions) {
+    await $app.db().delete('sessions', session.id);
+  }
+});
+```
+
 ## 🧩 PocketBase JavaScript VM Integration
 
 PocketVex provides comprehensive support for all PocketBase JavaScript features, making it truly Convex-like:

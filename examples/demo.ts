@@ -12,6 +12,7 @@ import { TypeGenerator } from '../src/utils/type-generator.js';
 import { DemoUtils, DEFAULT_DEMO_CONFIGS } from '../src/utils/demo-utils.js';
 import { schema as exampleSchema } from '../src/schema/example.js';
 import { schema as exampleSchema2 } from '../schema/example.schema.js';
+import { CronJobDemo } from './javascript-vm/cron-demo.js';
 
 // Demo implementations
 class BasicDemo {
@@ -450,12 +451,15 @@ async function runDemo() {
       case 'incremental':
         await IncrementalMigrationDemo.run();
         break;
-      case 'js-vm':
-        await JavaScriptVMFeaturesDemo.run();
-        break;
-      case 'test':
-        await TestConnectionDemo.run();
-        break;
+        case 'js-vm':
+          await JavaScriptVMFeaturesDemo.run();
+          break;
+        case 'cron':
+          await CronJobDemo.run();
+          break;
+        case 'test':
+          await TestConnectionDemo.run();
+          break;
       default:
         DemoUtils.printError('Unknown demo mode');
     }

@@ -47,6 +47,7 @@
     "demo:realtime": "bun run examples/live-demo/realtime-migration-demo.ts",
     "demo:incremental": "bun run examples/live-demo/incremental-migration-demo.ts",
     "demo:js-vm": "bun run examples/javascript-vm/js-features-demo.ts",
+    "demo:cron": "bun run examples/javascript-vm/cron-demo.ts",
     "demo:test": "bun run examples/live-demo/test-connection.ts",
     "dev-js": "bun run src/dev-server-js.ts"
   },

@@ -69,16 +69,20 @@ async function collectCredentials(
         adminEmail: email,
         adminPassword: password,
       });
-      
+
       await testClient.authenticate();
-      
+
       // Only cache if connection succeeds
       await credentialStore.storeCredentials(url, email, password, 24); // 24 hours TTL
       console.log(chalk.gray('💾 Credentials cached for 24 hours'));
     } catch (error) {
       // Don't cache if connection fails - but don't throw, just return the credentials
       // The calling function will handle the connection test
-      console.log(chalk.yellow('⚠️  Connection test will be performed with these credentials'));
+      console.log(
+        chalk.yellow(
+          '⚠️  Connection test will be performed with these credentials',
+        ),
+      );
     }
   }
 
@@ -237,7 +241,11 @@ schemaCmd
         }
       }
     } catch (error) {
-      DemoUtils.printError(`Schema apply failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      DemoUtils.printError(
+        `Schema apply failed: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      );
       process.exit(1);
     }
   });
@@ -736,7 +744,11 @@ utilCmd
         console.log(chalk.gray('💾 Credentials cached for 24 hours'));
       } catch (error) {
         // Fail silently - caching is optional
-        console.log(chalk.yellow('⚠️  Failed to cache credentials (connection was successful)'));
+        console.log(
+          chalk.yellow(
+            '⚠️  Failed to cache credentials (connection was successful)',
+          ),
+        );
       }
 
       DemoUtils.printSection('Setup Complete');
@@ -798,7 +810,12 @@ utilCmd
 
         // Cache credentials after successful connection
         try {
-          await credentialStore.storeCredentials(credentials.url, credentials.email, credentials.password, 24);
+          await credentialStore.storeCredentials(
+            credentials.url,
+            credentials.email,
+            credentials.password,
+            24,
+          );
           console.log(chalk.gray('💾 Credentials cached for 24 hours'));
         } catch (error) {
           // Fail silently - caching is optional
@@ -813,12 +830,24 @@ utilCmd
         DemoUtils.printSuccess('Connection test complete!');
       } catch (error) {
         spinner.fail('Connection failed');
-        DemoUtils.printError(`Failed to connect: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        console.log(chalk.gray('\n💡 Please check your PocketBase instance and credentials.'));
+        DemoUtils.printError(
+          `Failed to connect: ${
+            error instanceof Error ? error.message : 'Unknown error'
+          }`,
+        );
+        console.log(
+          chalk.gray(
+            '\n💡 Please check your PocketBase instance and credentials.',
+          ),
+        );
         process.exit(1);
       }
     } catch (error) {
-      DemoUtils.printError(`Test connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      DemoUtils.printError(
+        `Test connection failed: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      );
       process.exit(1);
     }
   });

@@ -50,6 +50,7 @@ export class DemoUtils {
           { name: '⚡ Real-time Migration Demo', value: 'realtime' },
           { name: '📈 Incremental Migration Demo', value: 'incremental' },
           { name: '🔧 JavaScript VM Features Demo', value: 'js-vm' },
+          { name: '⏰ CRON Jobs Demo', value: 'cron' },
           { name: '🧪 Test Connection Only', value: 'test' },
         ],
       },
