@@ -170,6 +170,20 @@ class CredentialStore {
     return credentials !== null;
   }
 
+  /**
+   * Get cached hosts (URLs) for selection
+   */
+  async getCachedHosts(): Promise<string[]> {
+    return this.listCachedUrls();
+  }
+
+  /**
+   * Check if a host is cached and valid
+   */
+  async isHostCached(url: string): Promise<boolean> {
+    return this.hasValidCredentials(url);
+  }
+
   private async ensureCacheDir(): Promise<void> {
     try {
       await access(this.cacheDir);

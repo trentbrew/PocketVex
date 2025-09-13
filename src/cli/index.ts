@@ -15,13 +15,18 @@ import { credentialStore } from '../utils/credential-store.js';
 import { startDevServer } from '../dev-server.js';
 import { schema as exampleSchema } from '../schema/example.js';
 
-// Utility function to collect credentials
-async function collectCredentials(
+// Utility function to collect host and credentials
+async function collectHostAndCredentials(
   globalOpts: any,
 ): Promise<{ url: string; email: string; password: string }> {
   let { url, email, password } = globalOpts;
 
-  // First, try to get cached credentials
+  // First, ask for host selection if not provided or if it's the default
+  if (!url || url === 'http://127.0.0.1:8090') {
+    url = await DemoUtils.selectHost();
+  }
+
+  // Then, try to get cached credentials for the selected host
   if (!email || !password) {
     const cached = await credentialStore.getCredentials(url);
     if (cached) {
@@ -154,7 +159,7 @@ schemaCmd
     try {
       DemoUtils.printHeader('Schema Apply', 'Applying changes to PocketBase');
 
-      const credentials = await collectCredentials(globalOpts);
+      const credentials = await collectHostAndCredentials(globalOpts);
 
       const spinner = DemoUtils.createSpinner('Connecting to PocketBase...');
       spinner.start();
@@ -474,7 +479,7 @@ devCmd
   .option('--once', 'Run once without watching (one-time sync)')
   .action(async (options) => {
     try {
-      const credentials = await collectCredentials(program.opts());
+      const credentials = await collectHostAndCredentials(program.opts());
 
       const config = {
         url: credentials.url,
@@ -788,7 +793,7 @@ utilCmd
     const globalOpts = program.opts();
 
     try {
-      const credentials = await collectCredentials(globalOpts);
+      const credentials = await collectHostAndCredentials(globalOpts);
 
       DemoUtils.printHeader(
         'Connection Test',

@@ -6,6 +6,7 @@
 import chalk from 'chalk';
 import ora, { type Ora } from 'ora';
 import inquirer from 'inquirer';
+import { credentialStore } from './credential-store.js';
 
 // Demo configuration types
 export interface DemoConfig {
@@ -35,6 +36,60 @@ export const DEFAULT_DEMO_CONFIGS: DemoConfigs = {
 
 // Demo utilities class
 export class DemoUtils {
+  /**
+   * Interactive host selection
+   */
+  static async selectHost(): Promise<string> {
+    const cachedHosts = await credentialStore.getCachedHosts();
+    
+    const choices = [
+      { name: '🌐 Live PocketBase (pocketvex.pockethost.io)', value: 'https://pocketvex.pockethost.io' },
+      { name: '🏠 Local PocketBase (127.0.0.1:8090)', value: 'http://127.0.0.1:8090' },
+    ];
+
+    // Add cached hosts if any exist
+    if (cachedHosts.length > 0) {
+      choices.unshift({ name: '📋 Cached Hosts', value: 'cached', disabled: true });
+      cachedHosts.forEach(host => {
+        choices.push({ name: `  💾 ${host}`, value: host });
+      });
+      choices.push({ name: '───────────────', value: 'separator', disabled: true });
+    }
+
+    choices.push({ name: '✏️  Enter custom URL', value: 'custom' });
+
+    const { host } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'host',
+        message: 'Select PocketBase host:',
+        choices,
+      },
+    ]);
+
+    if (host === 'custom') {
+      const { customHost } = await inquirer.prompt([
+        {
+          type: 'input',
+          name: 'customHost',
+          message: 'Enter PocketBase URL:',
+          default: 'http://127.0.0.1:8090',
+          validate: (input: string) => {
+            try {
+              new URL(input);
+              return true;
+            } catch {
+              return 'Please enter a valid URL (e.g., http://127.0.0.1:8090)';
+            }
+          },
+        },
+      ]);
+      return customHost;
+    }
+
+    return host;
+  }
+
   /**
    * Interactive demo mode selection
    */

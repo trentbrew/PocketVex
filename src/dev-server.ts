@@ -682,6 +682,11 @@ export const down = async (pb) => {
 export async function startDevServer(
   config: Partial<DevServerConfig> = {},
 ): Promise<void> {
+  // If no URL is provided, ask for host selection
+  if (!config.url) {
+    config.url = await DemoUtils.selectHost();
+  }
+
   const defaultConfig: DevServerConfig = {
     url: 'http://127.0.0.1:8090',
     adminEmail: 'admin@example.com',
@@ -704,7 +709,7 @@ export async function startDevServer(
     ...config,
   };
 
-  // Try to get cached credentials
+  // Try to get cached credentials for the selected host
   const cached = await credentialStore.getCredentials(defaultConfig.url);
   if (cached) {
     defaultConfig.adminEmail = cached.email;
