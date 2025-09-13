@@ -6,7 +6,7 @@
 // New user registration
 $app.onRecordCreate('users', async (e) => {
   console.log('👤 New user created:', e.record.id);
-  
+
   try {
     // Send welcome email
     await $app.newMailClient().send({
@@ -17,9 +17,9 @@ $app.onRecordCreate('users', async (e) => {
         <h1>Welcome ${e.record.name}!</h1>
         <p>Thank you for joining MyApp. We're excited to have you!</p>
         <p>Get started by creating your first post.</p>
-      `
+      `,
     });
-    
+
     console.log('✅ Welcome email sent to:', e.record.email);
   } catch (error) {
     console.error('❌ Failed to send welcome email:', error);
@@ -29,10 +29,10 @@ $app.onRecordCreate('users', async (e) => {
 // User profile update
 $app.onRecordUpdate('users', async (e) => {
   console.log('👤 User updated:', e.record.id);
-  
+
   // Update last modified timestamp
   e.record.lastModifiedAt = new Date().toISOString();
-  
+
   // Log profile changes for analytics
   try {
     await $app.db().create('user_activity', {
@@ -41,8 +41,8 @@ $app.onRecordUpdate('users', async (e) => {
       timestamp: new Date().toISOString(),
       details: {
         fieldsChanged: Object.keys(e.record),
-        previousData: e.oldRecord
-      }
+        previousData: e.oldRecord,
+      },
     });
   } catch (error) {
     console.error('❌ Failed to log user activity:', error);
@@ -52,15 +52,18 @@ $app.onRecordUpdate('users', async (e) => {
 // User login tracking
 $app.onRecordUpdate('users', async (e) => {
   // Check if this is a login (lastLoginAt was updated)
-  if (e.record.lastLoginAt && e.record.lastLoginAt !== e.oldRecord?.lastLoginAt) {
+  if (
+    e.record.lastLoginAt &&
+    e.record.lastLoginAt !== e.oldRecord?.lastLoginAt
+  ) {
     console.log('🔐 User logged in:', e.record.id);
-    
+
     try {
       // Update login statistics
       await $app.db().create('login_stats', {
         userId: e.record.id,
         loginAt: e.record.lastLoginAt,
-        ipAddress: e.record.lastLoginIp || 'unknown'
+        ipAddress: e.record.lastLoginIp || 'unknown',
       });
     } catch (error) {
       console.error('❌ Failed to log login stats:', error);
