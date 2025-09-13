@@ -1,6 +1,6 @@
 {
   "name": "pocketvex",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Schema migration system for PocketBase with real-time development workflow",
   "main": "dist/lib.js",
   "module": "dist/lib.js",
