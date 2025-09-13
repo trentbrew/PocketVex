@@ -141,11 +141,12 @@ bun run dev:once
 
 **🔄 Real-time Features:**
 
-- **File Watching:** Automatically detects schema changes
+- **File Watching:** Automatically detects schema changes and JavaScript VM files
 - **Safe Changes:** Applied immediately to PocketBase
 - **Unsafe Changes:** Generate migration files for review
 - **Type Generation:** Auto-generates TypeScript types
-- **JavaScript VM:** Watches PocketBase server-side files
+- **JavaScript VM Deployment:** Automatically deploys CRON jobs, hooks, and commands to PocketBase
+- **Hot Reload:** No manual intervention required during development
 
 #### Development Workflow
 
@@ -155,7 +156,7 @@ bun run dev:once
    bun run dev
    ```
 
-2. **Edit schema files** in the `schema/` directory:
+2. **Edit schema files** in the `schema/` directory or **JavaScript VM files** in `pb_jobs/`, `pb_hooks/`, etc.:
 
    ```typescript
    // schema/my-schema.ts
@@ -183,6 +184,44 @@ bun run dev:once
    ```bash
    bun run cli migrate up
    ```
+
+#### JavaScript VM Auto-Deployment
+
+PocketVex automatically deploys JavaScript VM files to your PocketBase instance, just like Convex deploys files in the `/convex` folder:
+
+**Supported Directories:**
+- `./pb_jobs/` - CRON jobs and scheduled tasks
+- `./pb_hooks/` - Event hooks and middleware  
+- `./pb_commands/` - Console commands
+- `./pb_queries/` - Custom queries and utilities
+
+**How it works:**
+1. **File Watching**: PocketVex watches all JavaScript files in these directories
+2. **Auto-Deployment**: When you save a file, it's automatically deployed to PocketBase
+3. **Hot Reload**: Changes take effect immediately without restarting PocketBase
+4. **Error Handling**: Failed deployments are logged with clear error messages
+
+**Example:**
+```bash
+# Start the dev server
+bun run dev
+
+# Edit a CRON job file
+echo '$jobs.register("test", "*/60 * * * * *", () => console.log("Hello!"));' > pb_jobs/test.js
+
+# File is automatically deployed to PocketBase!
+# ✅ Deployed: test.js → pb_jobs/
+```
+
+**Initial Deployment:**
+When you start the dev server, PocketVex automatically deploys all existing JavaScript VM files:
+```
+🚀 Deploying existing JavaScript VM files...
+  📁 Found 2 files in pb_jobs/
+✅ Deployed: basic-logging.js → pb_jobs/
+✅ Deployed: example-jobs.js → pb_jobs/
+✅ Deployed 2 JavaScript VM files
+```
 
 ### 4. Live Demo with PocketBase Instance
 

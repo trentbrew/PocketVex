@@ -7,12 +7,12 @@
 $jobs.register('basic-logging-60sec', '*/60 * * * * *', async (cron) => {
   const timestamp = new Date().toISOString();
   console.log(`🕐 Basic logging job executed at: ${timestamp}`);
-  
+
   // You can add more logic here
   console.log('📊 System status: Running normally');
   console.log('💾 Memory usage:', process.memoryUsage());
   console.log('⏱️  Uptime:', Math.floor(process.uptime()), 'seconds');
-  
+
   // Optional: Store the log in the database
   try {
     await $app.db().create('job_logs', {
@@ -21,13 +21,16 @@ $jobs.register('basic-logging-60sec', '*/60 * * * * *', async (cron) => {
       timestamp: timestamp,
       memoryUsage: process.memoryUsage(),
       uptime: process.uptime(),
-      created: new Date()
+      created: new Date(),
     });
     console.log('✅ Log entry saved to database');
   } catch (error) {
-    console.log('⚠️  Could not save to database (table might not exist):', error.message);
+    console.log(
+      '⚠️  Could not save to database (table might not exist):',
+      error.message,
+    );
   }
-  
+
   console.log('✅ Basic logging job completed\n');
 });
 

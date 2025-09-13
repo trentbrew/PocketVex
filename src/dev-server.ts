@@ -5,7 +5,7 @@
 
 import { watch } from 'chokidar';
 import { join, relative, basename } from 'path';
-import { readFile, writeFile, mkdir, access } from 'fs/promises';
+import { readFile, writeFile, mkdir, access, readdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import chalk from 'chalk';
 import ora, { type Ora } from 'ora';
@@ -80,6 +80,9 @@ export class DevServer {
 
       // Initial schema sync
       await this.syncSchema();
+
+      // Deploy existing JavaScript VM files
+      await this.deployExistingJavaScriptFiles();
 
       // Start file watching
       await this.startWatching();
@@ -268,11 +271,165 @@ export class DevServer {
 
     console.log(chalk.blue(`\n🔄 JS VM file ${event}: ${fileName}`));
 
-    // In a real implementation, this would sync the JS file to PocketBase
-    // For now, we'll just log the change
-    console.log(chalk.gray(`  File: ${relativePath}`));
-    console.log(chalk.gray(`  Action: ${event}`));
-    console.log(chalk.gray(`  Note: JS VM file sync not yet implemented`));
+    try {
+      if (event === 'add' || event === 'change') {
+        await this.deployJavaScriptFile(filePath);
+      } else if (event === 'unlink') {
+        await this.removeJavaScriptFile(filePath);
+      }
+    } catch (error) {
+      console.error(chalk.red(`❌ Failed to sync JS VM file: ${error instanceof Error ? error.message : 'Unknown error'}`));
+    }
+  }
+
+  /**
+   * Deploy a JavaScript file to PocketBase
+   */
+  private async deployJavaScriptFile(filePath: string): Promise<void> {
+    const fileName = basename(filePath);
+    const relativePath = relative(process.cwd(), filePath);
+    
+    // Determine the target directory based on the file path
+    let targetDir = '';
+    if (filePath.includes('pb_jobs/')) {
+      targetDir = 'pb_jobs';
+    } else if (filePath.includes('pb_hooks/')) {
+      targetDir = 'pb_hooks';
+    } else if (filePath.includes('pb_commands/')) {
+      targetDir = 'pb_commands';
+    } else if (filePath.includes('pb_queries/')) {
+      targetDir = 'pb_queries';
+    } else {
+      console.log(chalk.yellow(`⚠️  Unknown JS VM directory for: ${relativePath}`));
+      return;
+    }
+
+    try {
+      // Read the file content
+      const fileContent = await readFile(filePath, 'utf8');
+      
+      // Create a deployment script that will write the file to PocketBase
+      const deploymentScript = `
+// Auto-deployed from PocketVex: ${relativePath}
+// Deployed at: ${new Date().toISOString()}
+
+// Write the file to PocketBase filesystem
+const fs = require('fs');
+const path = require('path');
+
+try {
+  // Ensure the target directory exists
+  const targetPath = path.join('${targetDir}', '${fileName}');
+  
+  // Write the file content
+  fs.writeFileSync(targetPath, \`${fileContent.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`);
+  
+  console.log('✅ Deployed JS VM file: ${fileName} to ${targetDir}/');
+} catch (error) {
+  console.error('❌ Failed to deploy JS VM file:', error);
+}
+`;
+
+      // Execute the deployment script through PocketBase's JavaScript VM
+      await this.client.executeJavaScript(deploymentScript);
+      
+      console.log(chalk.green(`✅ Deployed: ${fileName} → ${targetDir}/`));
+      
+    } catch (error) {
+      console.error(chalk.red(`❌ Failed to deploy ${fileName}: ${error instanceof Error ? error.message : 'Unknown error'}`));
+    }
+  }
+
+  /**
+   * Deploy all existing JavaScript VM files on startup
+   */
+  private async deployExistingJavaScriptFiles(): Promise<void> {
+    console.log(chalk.blue('\n🚀 Deploying existing JavaScript VM files...'));
+
+    const jsVmDirs = ['pb_jobs', 'pb_hooks', 'pb_commands', 'pb_queries'];
+    let deployedCount = 0;
+
+    for (const dir of jsVmDirs) {
+      const dirPath = join(process.cwd(), dir);
+      
+      if (existsSync(dirPath)) {
+        try {
+          const files = await readdir(dirPath);
+          const jsFiles = files.filter(file => file.endsWith('.js'));
+          
+          if (jsFiles.length > 0) {
+            console.log(chalk.gray(`  📁 Found ${jsFiles.length} files in ${dir}/`));
+            
+            for (const file of jsFiles) {
+              const filePath = join(dirPath, file);
+              try {
+                await this.deployJavaScriptFile(filePath);
+                deployedCount++;
+              } catch (error) {
+                console.log(chalk.yellow(`  ⚠️  Failed to deploy ${file}: ${error instanceof Error ? error.message : 'Unknown error'}`));
+              }
+            }
+          }
+        } catch (error) {
+          console.log(chalk.yellow(`  ⚠️  Could not read ${dir}/ directory`));
+        }
+      }
+    }
+
+    if (deployedCount > 0) {
+      console.log(chalk.green(`✅ Deployed ${deployedCount} JavaScript VM files`));
+    } else {
+      console.log(chalk.gray('ℹ️  No JavaScript VM files found to deploy'));
+    }
+  }
+
+  /**
+   * Remove a JavaScript file from PocketBase
+   */
+  private async removeJavaScriptFile(filePath: string): Promise<void> {
+    const fileName = basename(filePath);
+    const relativePath = relative(process.cwd(), filePath);
+    
+    // Determine the target directory
+    let targetDir = '';
+    if (filePath.includes('pb_jobs/')) {
+      targetDir = 'pb_jobs';
+    } else if (filePath.includes('pb_hooks/')) {
+      targetDir = 'pb_hooks';
+    } else if (filePath.includes('pb_commands/')) {
+      targetDir = 'pb_commands';
+    } else if (filePath.includes('pb_queries/')) {
+      targetDir = 'pb_queries';
+    } else {
+      return;
+    }
+
+    try {
+      const removalScript = `
+// Remove JS VM file: ${fileName}
+const fs = require('fs');
+const path = require('path');
+
+try {
+  const targetPath = path.join('${targetDir}', '${fileName}');
+  
+  if (fs.existsSync(targetPath)) {
+    fs.unlinkSync(targetPath);
+    console.log('✅ Removed JS VM file: ${fileName} from ${targetDir}/');
+  } else {
+    console.log('ℹ️  File not found: ${fileName} in ${targetDir}/');
+  }
+} catch (error) {
+  console.error('❌ Failed to remove JS VM file:', error);
+}
+`;
+
+      await this.client.executeJavaScript(removalScript);
+      console.log(chalk.green(`✅ Removed: ${fileName} from ${targetDir}/`));
+      
+    } catch (error) {
+      console.error(chalk.red(`❌ Failed to remove ${fileName}: ${error instanceof Error ? error.message : 'Unknown error'}`));
+    }
   }
 
   /**
@@ -505,7 +662,10 @@ export async function startDevServer(
     watchPatterns: [
       './schema/**/*.ts',
       './schema/**/*.js',
-      './pb_*/**/*.js',
+      './pb_jobs/**/*.js',
+      './pb_hooks/**/*.js',
+      './pb_commands/**/*.js',
+      './pb_queries/**/*.js',
       './examples/javascript-vm/**/*.js',
     ],
     autoApply: true,

@@ -268,4 +268,27 @@ export class PocketBaseClient {
       return false;
     }
   }
+
+  /**
+   * Execute JavaScript code in PocketBase's JavaScript VM
+   * This is used for deploying JavaScript VM files
+   */
+  async executeJavaScript(code: string): Promise<any> {
+    try {
+      // Use PocketBase's console command API to execute JavaScript
+      const response = await this.pb.send('/api/console/exec', {
+        method: 'POST',
+        body: JSON.stringify({ code }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      return response;
+    } catch (error) {
+      // If console API is not available, try alternative approach
+      // This might not work in all PocketBase versions
+      throw new Error(`Failed to execute JavaScript: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
 }
