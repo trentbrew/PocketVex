@@ -112,7 +112,7 @@ npx pocketvex util credentials   # Then select "Clear all credentials"
 npx pocketvex util credentials   # Then select "Remove specific credentials"
 ```
 
-### 2. Unified CLI Commands
+### Unified CLI Commands
 
 PocketVex features a unified CLI system with organized commands:
 
@@ -138,6 +138,7 @@ npx pocketvex dev                  # Start development server
 
 # Interactive demos
 npx pocketvex demo                 # Run unified demo system
+# Tip: use `@latest` with npx if you want to bypass local cache (e.g., `npx pocketvex@latest demo`)
 
 # Utilities
 npx pocketvex util setup           # Interactive setup for credentials
@@ -145,7 +146,7 @@ npx pocketvex util credentials     # Manage cached credentials
 npx pocketvex util test-connection # Test PocketBase connection
 ```
 
-### 3. Start Development Server
+### Start Development Server
 
 PocketVex includes a real-time development server similar to `npx convex dev`:
 
@@ -267,7 +268,7 @@ JavaScript VM files need to be manually deployed to PocketBase:
 
 3. **Or use PocketBase Admin UI** to upload files directly
 
-### 4. Live Demo with PocketBase Instance
+### Live Demo with PocketBase Instance
 
 Try PocketVex with a live PocketBase instance:
 
@@ -329,7 +330,7 @@ This demo showcases:
 - Raw database queries with type safety
 - Automatic TypeScript type generation
 
-### 3. Define Your Schema
+### Define Your Schema
 
 Create schema files in `schema/` directory:
 
@@ -369,7 +370,7 @@ export const schema = {
 } as const;
 ```
 
-### 3. Watch Changes Apply Automatically
+### Watch Changes Apply Automatically
 
 When you save schema files, PocketVex will:
 
@@ -566,8 +567,8 @@ interface SchemaField {
 }
 
 interface SchemaRules {
-  list?: string;   // Who can list records
-  view?: string;   // Who can view individual records
+  list?: string; // Who can list records
+  view?: string; // Who can view individual records
   create?: string; // Who can create records
   update?: string; // Who can update records
   delete?: string; // Who can delete records
@@ -580,11 +581,11 @@ PocketVex uses PocketBase's powerful rule system for access control. Rules are J
 
 ### Rule Operations
 
-- **`list`**: Controls who can fetch multiple records (GET `/api/collections/{collection}`)
-- **`view`**: Controls who can fetch a single record (GET `/api/collections/{collection}/{id}`)
-- **`create`**: Controls who can create new records (POST `/api/collections/{collection}`)
-- **`update`**: Controls who can update existing records (PATCH `/api/collections/{collection}/{id}`)
-- **`delete`**: Controls who can delete records (DELETE `/api/collections/{collection}/{id}`)
+- **`list`**: Controls who can fetch multiple records (GET `/api/collections/{collection}/records`)
+- **`view`**: Controls who can fetch a single record (GET `/api/collections/{collection}/records/{id}`)
+- **`create`**: Controls who can create new records (POST `/api/collections/{collection}/records`)
+- **`update`**: Controls who can update existing records (PATCH `/api/collections/{collection}/records/{id}`)
+- **`delete`**: Controls who can delete records (DELETE `/api/collections/{collection}/records/{id}`)
 
 ### Rule Syntax
 
@@ -654,22 +655,22 @@ PocketVex provides a `Rules` helper for building complex rule expressions:
 import { Rules } from 'pocketvex';
 
 // Simple rules
-const publicRead = Rules.public();                    // "1=1"
-const authenticatedOnly = Rules.authenticated();      // "@request.auth.id != ''"
-const adminOnly = Rules.role('admin');               // "@request.auth.role = 'admin'"
+const publicRead = Rules.public(); // "1=1"
+const authenticatedOnly = Rules.authenticated(); // "@request.auth.id != ''"
+const adminOnly = Rules.role('admin'); // "@request.auth.role = 'admin'"
 
 // Complex rules
 const ownerOrAdmin = Rules.or(
-  Rules.owner('author'),                              // "@request.auth.id = author"
-  Rules.role('admin')                                 // "@request.auth.role = 'admin'"
+  Rules.owner('author'), // "@request.auth.id = author"
+  Rules.role('admin'), // "@request.auth.role = 'admin'"
 );
 
 const authenticatedUser = Rules.and(
-  Rules.authenticated(),                              // "@request.auth.id != ''"
+  Rules.authenticated(), // "@request.auth.id != ''"
   Rules.or(
-    Rules.role('user'),                               // "@request.auth.role = 'user'"
-    Rules.role('admin')                               // "@request.auth.role = 'admin'"
-  )
+    Rules.role('user'), // "@request.auth.role = 'user'"
+    Rules.role('admin'), // "@request.auth.role = 'admin'"
+  ),
 );
 
 // Use in schema
@@ -681,14 +682,18 @@ export const schema = {
       schema: [
         { name: 'title', type: 'text', required: true },
         { name: 'content', type: 'editor' },
-        { name: 'author', type: 'relation', options: { collectionId: 'users' } },
+        {
+          name: 'author',
+          type: 'relation',
+          options: { collectionId: 'users' },
+        },
       ],
       rules: {
-        list: publicRead,                              // Anyone can list
-        view: publicRead,                              // Anyone can view
-        create: authenticatedOnly,                     // Only authenticated users
-        update: ownerOrAdmin,                          // Owner or admin
-        delete: adminOnly,                             // Only admins
+        list: publicRead, // Anyone can list
+        view: publicRead, // Anyone can view
+        create: authenticatedOnly, // Only authenticated users
+        update: ownerOrAdmin, // Owner or admin
+        delete: adminOnly, // Only admins
       },
     },
   ],
@@ -698,6 +703,7 @@ export const schema = {
 ### Rule Examples by Use Case
 
 **Blog Posts**:
+
 ```typescript
 rules: {
   list: "1=1",                              // Public blog
@@ -709,6 +715,7 @@ rules: {
 ```
 
 **User Profiles**:
+
 ```typescript
 rules: {
   list: "@request.auth.id != ''",           // Only authenticated users
@@ -720,6 +727,7 @@ rules: {
 ```
 
 **Admin-Only Collections**:
+
 ```typescript
 rules: {
   list: "@request.auth.role = 'admin'",     // Only admins
@@ -731,6 +739,7 @@ rules: {
 ```
 
 **Public API**:
+
 ```typescript
 rules: {
   list: "1=1",                              // Anyone can list
@@ -793,7 +802,7 @@ Editor fields store HTML content like:
 
 ```html
 <p>
-  <strong>Trent</strong> like
+  <strong>Trent</strong> likes
   <span style="text-decoration: underline;">computers</span> &amp; snowboarding
 </p>
 ```
