@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 /**
  * Migration CLI for PocketVex
  * Handles running, generating, and managing migrations
@@ -11,7 +11,7 @@ import { readdir, readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { SchemaDiff } from '../utils/diff.js';
 import { PocketBaseClient } from '../utils/pocketbase.js';
-import { schema as exampleSchema } from '../pocketvex/schema/example.schema.ts';
+import { schema as exampleSchema } from '../../pocketvex/schema/example.schema.ts';
 
 const program = new Command();
 

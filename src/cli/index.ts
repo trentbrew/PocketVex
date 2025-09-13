@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 /**
  * PocketVex Unified CLI
  * Comprehensive command-line interface for schema management
@@ -13,35 +13,40 @@ import { PocketBaseClient } from '../utils/pocketbase.js';
 import { TypeGenerator } from '../utils/type-generator.js';
 import { credentialStore } from '../utils/credential-store.js';
 import { startDevServer } from '../dev-server.js';
-// import { schema as exampleSchema } from '../pocketvex/schema/example.schema.ts';
-
-// Temporary schema for CLI commands
-const exampleSchema = {
-  collections: [
-    {
-      name: 'users',
-      type: 'base' as const,
-      schema: [
-        { name: 'name', type: 'text' as const, required: true },
-        { name: 'email', type: 'email' as const, required: true, unique: true },
-        { name: 'avatar', type: 'file' as const },
-        { name: 'created', type: 'date' as const, required: true },
-      ],
-    },
-    {
-      name: 'posts',
-      type: 'base' as const,
-      schema: [
-        { name: 'title', type: 'text' as const, required: true },
-        { name: 'content', type: 'editor' as const, required: true },
-        { name: 'author', type: 'relation' as const, options: { collectionId: 'users' } },
-        { name: 'published', type: 'bool' as const, required: true },
-        { name: 'tags', type: 'select' as const, options: { values: ['tech', 'life', 'work'] } },
-      ],
-    },
-  ],
-};
+// Dynamic import for schema
+let exampleSchema: any;
 import { getPocketVexConfig } from '../config/pocketvex-config.js';
+
+// Function to load schema dynamically
+async function loadSchema() {
+  if (!exampleSchema) {
+    try {
+      const schemaModule = await import('../../pocketvex/schema/schema.js');
+      exampleSchema = schemaModule.schema;
+    } catch (error) {
+      console.error('Failed to load schema:', error);
+      // Fallback to basic schema
+      exampleSchema = {
+        collections: [
+          {
+            name: 'users',
+            type: 'base' as const,
+            schema: [
+              { name: 'name', type: 'text' as const, required: true },
+              {
+                name: 'email',
+                type: 'email' as const,
+                required: true,
+                unique: true,
+              },
+            ],
+          },
+        ],
+      };
+    }
+  }
+  return exampleSchema;
+}
 
 // Utility function to collect host and credentials
 async function collectHostAndCredentials(
@@ -161,6 +166,109 @@ program
     console.log(chalk.gray(`Generated: ${config.getGeneratedDirectory()}`));
   });
 
+program
+  .command('verify')
+  .description('Verify current PocketBase schema against desired schema')
+  .option('--url <url>', 'PocketBase URL')
+  .option('--email <email>', 'Admin email')
+  .option('--password <password>', 'Admin password')
+  .action(async (options) => {
+    try {
+      DemoUtils.printHeader(
+        'Schema Verification',
+        'Checking PocketBase collections',
+      );
+
+      const credentials = await collectHostAndCredentials(options);
+      const spinner = DemoUtils.createSpinner('Connecting to PocketBase...');
+      spinner.start();
+
+      const client = new PocketBaseClient({
+        url: credentials.url,
+        adminEmail: credentials.email,
+        adminPassword: credentials.password,
+      });
+      await client.authenticate();
+      spinner.succeed('Connected successfully!');
+
+      // Get current schema from PocketBase
+      const currentSchema = await client.fetchCurrentSchema();
+      const desiredSchema = await loadSchema();
+
+      console.log(chalk.blue('\n📊 Current PocketBase Collections:'));
+      console.log(chalk.gray('─────────────────────────────────'));
+      if (currentSchema.collections && currentSchema.collections.length > 0) {
+        currentSchema.collections.forEach((collection: any) => {
+          console.log(
+            chalk.white(`📁 ${collection.name} (${collection.type})`),
+          );
+          if (collection.schema && collection.schema.length > 0) {
+            collection.schema.forEach((field: any) => {
+              const required = field.required ? ' *' : '';
+              const unique = field.unique ? ' 🔑' : '';
+              console.log(
+                chalk.gray(
+                  `   └─ ${field.name}: ${field.type}${required}${unique}`,
+                ),
+              );
+            });
+          }
+        });
+      } else {
+        console.log(chalk.yellow('   No collections found'));
+      }
+
+      console.log(chalk.blue('\n📋 Desired Schema Collections:'));
+      console.log(chalk.gray('─────────────────────────────'));
+      if (desiredSchema.collections && desiredSchema.collections.length > 0) {
+        desiredSchema.collections.forEach((collection: any) => {
+          console.log(
+            chalk.white(`📁 ${collection.name} (${collection.type})`),
+          );
+          if (collection.schema && collection.schema.length > 0) {
+            collection.schema.forEach((field: any) => {
+              const required = field.required ? ' *' : '';
+              const unique = field.unique ? ' 🔑' : '';
+              console.log(
+                chalk.gray(
+                  `   └─ ${field.name}: ${field.type}${required}${unique}`,
+                ),
+              );
+            });
+          }
+        });
+      } else {
+        console.log(chalk.yellow('   No collections defined'));
+      }
+
+      // Show differences
+      const plan = SchemaDiff.buildDiffPlan(desiredSchema, currentSchema);
+
+      if (plan.safe.length > 0 || plan.unsafe.length > 0) {
+        console.log(chalk.blue('\n🔄 Required Changes:'));
+        console.log(chalk.gray('───────────────────'));
+
+        if (plan.safe.length > 0) {
+          console.log(chalk.green('✅ Safe Operations:'));
+          plan.safe.forEach((op: any, index: number) => {
+            console.log(chalk.gray(`   ${index + 1}. ${op.summary}`));
+          });
+        }
+
+        if (plan.unsafe.length > 0) {
+          console.log(chalk.yellow('⚠️  Unsafe Operations:'));
+          plan.unsafe.forEach((op: any, index: number) => {
+            console.log(chalk.gray(`   ${index + 1}. ${op.summary}`));
+          });
+        }
+      } else {
+        console.log(chalk.green('\n✅ Schema is up to date!'));
+      }
+    } catch (error) {
+      console.error(chalk.red('❌ Verification failed:'), error);
+    }
+  });
+
 // Global options
 program
   .option('--url <url>', 'PocketBase URL', 'http://127.0.0.1:8090')
@@ -187,8 +295,8 @@ schemaCmd
       DemoUtils.printHeader('Schema Diff', 'Comparing schemas');
 
       // For now, use the example schema as desired
-      const desired = exampleSchema;
-      const current = exampleSchema; // In real usage, this would be fetched from PocketBase
+      const desired = await loadSchema();
+      const current = await loadSchema(); // In real usage, this would be fetched from PocketBase
 
       const plan = SchemaDiff.buildDiffPlan(desired, current);
 
@@ -233,7 +341,7 @@ schemaCmd
       spinner.succeed('Connected successfully!');
 
       const currentSchema = await client.fetchCurrentSchema();
-      const plan = SchemaDiff.buildDiffPlan(exampleSchema, currentSchema);
+      const plan = SchemaDiff.buildDiffPlan(await loadSchema(), currentSchema);
 
       if (options.safeOnly) {
         if (plan.safe.length === 0) {
@@ -339,8 +447,8 @@ migrateCmd
       spinner.start();
 
       // In real usage, this would compare with current PocketBase schema
-      const current = exampleSchema;
-      const desired = exampleSchema;
+      const current = await loadSchema();
+      const desired = await loadSchema();
       const plan = SchemaDiff.buildDiffPlan(desired, current);
 
       spinner.succeed('Schema analysis complete!');
@@ -492,7 +600,7 @@ typesCmd
       const spinner = DemoUtils.createSpinner('Generating types...');
       spinner.start();
 
-      const typesContent = TypeGenerator.generateTypes(exampleSchema);
+      const typesContent = TypeGenerator.generateTypes(await loadSchema());
       // In a real implementation, this would write to files
       console.log(
         chalk.gray(
@@ -545,7 +653,7 @@ devCmd
         url: credentials.url,
         adminEmail: credentials.email,
         adminPassword: credentials.password,
-        autoApply: !options.once, // Auto-apply unless --once is specified
+        autoApply: true, // Always auto-apply changes
         generateTypes: true,
         verbose: program.opts().verbose || false,
       };
@@ -577,7 +685,10 @@ devCmd
         spinner.succeed('Connected successfully!');
 
         const currentSchema = await client.fetchCurrentSchema();
-        const plan = SchemaDiff.buildDiffPlan(exampleSchema, currentSchema);
+        const plan = SchemaDiff.buildDiffPlan(
+          await loadSchema(),
+          currentSchema,
+        );
 
         if (plan.safe.length > 0) {
           DemoUtils.printSection('Safe Operations');
@@ -593,8 +704,42 @@ devCmd
             applySpinner.start();
 
             try {
-              // In real implementation, this would apply the operations
-              applySpinner.succeed('Schema sync complete!');
+              // Actually apply the operations with delays to avoid rate limits
+              let successCount = 0;
+              let failureCount = 0;
+
+              for (let i = 0; i < plan.safe.length; i++) {
+                const operation = plan.safe[i];
+                try {
+                  await client.applyOperation(operation);
+                  successCount++;
+                } catch (error) {
+                  console.log(chalk.red(`  ❌ Failed: ${operation.summary}`));
+                  console.log(
+                    chalk.gray(
+                      `     Error: ${
+                        error instanceof Error ? error.message : 'Unknown error'
+                      }`,
+                    ),
+                  );
+                  failureCount++;
+                }
+
+                // Add a delay between operations to avoid rate limits
+                if (i < plan.safe.length - 1) {
+                  await new Promise((resolve) => setTimeout(resolve, 500));
+                }
+              }
+
+              if (failureCount === 0) {
+                applySpinner.succeed(
+                  `Successfully applied ${successCount} changes`,
+                );
+              } else {
+                applySpinner.warn(
+                  `Applied ${successCount} changes, ${failureCount} failed`,
+                );
+              }
             } catch (error) {
               DemoUtils.handleOperationError(
                 error,

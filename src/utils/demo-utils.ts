@@ -345,6 +345,23 @@ export class DemoUtils {
       console.log(chalk.gray('\nSafe operations that would be applied:'));
       plan.safe.forEach((op: any, i: number) => {
         console.log(chalk.green(`  ${i + 1}. ${op.summary || op.description}`));
+        if (op.kind === 'updateRules' && op.payload) {
+          const r = op.payload;
+          const tag = (v: any) => {
+            const sRaw = (v ?? '').toString().trim();
+            const s = sRaw.toLowerCase();
+            if (s === 'true' || s === '1=1') return '(public)';
+            if (!s) return '(admin only)';
+            return sRaw;
+          };
+          console.log(
+            chalk.gray(
+              `      rules → list: ${tag(r.list)}, view: ${tag(r.view)}, create: ${tag(
+                r.create,
+              )}, update: ${tag(r.update)}, delete: ${tag(r.delete)}`,
+            ),
+          );
+        }
       });
     }
 

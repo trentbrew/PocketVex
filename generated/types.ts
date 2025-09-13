@@ -20,6 +20,99 @@ export interface AuthRecord extends BaseRecord {
   lastVerificationSentAt?: string;
 }
 
+// users collection
+export interface UsersRecord extends AuthRecord {
+  name?: string;
+  avatar?: string | string[];
+  bio?: string;
+  role?: string;
+  website?: string;
+  nickname?: string;
+  age?: number;
+}
+
+export interface UsersCreate {
+  name?: string;
+  avatar?: string | string[];
+  bio?: string;
+  role?: string;
+  website?: string;
+  nickname?: string;
+  age?: number;
+}
+
+export interface UsersUpdate {
+  name?: string;
+  avatar?: string | string[];
+  bio?: string;
+  role?: string;
+  website?: string;
+  nickname?: string;
+  age?: number;
+}
+
+export interface UsersRules {
+  list?: string;
+  view?: string;
+  create?: string;
+  update?: string;
+  delete?: string;
+}
+
+// posts collection
+export interface PostsRecord extends BaseRecord {
+  title: string;
+  content: string;
+  published: boolean;
+  tags?: string;
+}
+
+export interface PostsCreate {
+  title: string;
+  content: string;
+  published: boolean;
+  tags?: string;
+}
+
+export interface PostsUpdate {
+  title?: string;
+  content?: string;
+  published?: boolean;
+  tags?: string;
+}
+
+export interface PostsRules {
+  list?: string;
+  view?: string;
+  create?: string;
+  update?: string;
+  delete?: string;
+}
+
+// comments collection
+export interface CommentsRecord extends BaseRecord {
+  content: string;
+  approved: boolean;
+}
+
+export interface CommentsCreate {
+  content: string;
+  approved: boolean;
+}
+
+export interface CommentsUpdate {
+  content?: string;
+  approved?: boolean;
+}
+
+export interface CommentsRules {
+  list?: string;
+  view?: string;
+  create?: string;
+  update?: string;
+  delete?: string;
+}
+
 // courses collection
 export interface CoursesRecord extends BaseRecord {
   title: string;

@@ -6,11 +6,24 @@
     "outDir": "../dist",
     "rootDir": "../src"
   },
-  "include": ["../src/**/*"],
+  "include": [
+    "../src/lib.ts",
+    "../src/utils/diff.ts",
+    "../src/utils/rules.ts",
+    "../src/types/schema.ts",
+    "../src/types/pocketbase-js.ts"
+  ],
   "exclude": [
     "../node_modules",
     "../dist",
     "../examples",
+    "../pocketvex",
+    "../src/cli/**",
+    "../src/dev-server*.ts",
+    "../src/dev-server-js.ts",
+    "../src/utils/credential-store.ts",
+    "../src/utils/pocketbase.ts",
+    "../src/utils/demo-utils.ts",
     "**/*.test.ts",
     "**/*.spec.ts"
   ]

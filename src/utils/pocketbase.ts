@@ -75,7 +75,7 @@ export class PocketBaseClient {
    * Apply a migration operation to PocketBase
    */
   async applyOperation(operation: MigrationOperation): Promise<void> {
-    try {
+    const attemptOperation = async () => {
       switch (operation.kind) {
         case 'createCollection':
           await this.createCollection(operation.payload);
@@ -111,10 +111,30 @@ export class PocketBaseClient {
         default:
           throw new Error(`Unknown operation type: ${operation.kind}`);
       }
-    } catch (error) {
-      throw new Error(
-        `Failed to apply operation '${operation.summary}': ${error}`,
-      );
+    };
+
+    const maxAttempts = 5;
+    let attempt = 0;
+    while (true) {
+      try {
+        await attemptOperation();
+        return;
+      } catch (error: any) {
+        attempt++;
+        const status =
+          error?.status || error?.data?.code || error?.response?.status;
+        const message = error?.message || String(error);
+        const isRateLimited =
+          status === 429 || /\b429\b|rate limit/i.test(message);
+        if (isRateLimited && attempt < maxAttempts) {
+          const backoff = Math.min(2000, 250 * Math.pow(2, attempt - 1));
+          await new Promise((r) => setTimeout(r, backoff));
+          continue;
+        }
+        throw new Error(
+          `Failed to apply operation '${operation.summary}': ${message}`,
+        );
+      }
     }
   }
 
@@ -122,12 +142,21 @@ export class PocketBaseClient {
    * Create a new collection
    */
   private async createCollection(collection: SchemaCollection): Promise<void> {
+    // Ensure schema fields have IDs
+    const schemaWithIds = (collection.schema || []).map((field: any) => ({
+      id: field.id || `field_${field.name}_${Date.now()}`,
+      name: field.name,
+      type: field.type,
+      required: field.required || false,
+      unique: field.unique || false,
+      options: field.options || {},
+    }));
+
     await this.pb.collections.create({
-      id: collection.id,
       name: collection.name,
       type: collection.type || 'base',
       system: collection.system || false,
-      schema: collection.schema || [],
+      schema: schemaWithIds,
       indexes: collection.indexes || [],
       listRule: collection.rules?.list || null,
       viewRule: collection.rules?.view || null,
@@ -169,8 +198,30 @@ export class PocketBaseClient {
    * Add a field to a collection
    */
   private async addField(collectionName: string, field: any): Promise<void> {
-    const collection = await this.pb.collections.getOne(collectionName);
-    collection.schema.push(field);
+    // First, get the collection by name
+    const collections = await this.pb.collections.getFullList();
+    const collection = collections.find(
+      (col: any) => col.name === collectionName,
+    );
+
+    if (!collection) {
+      throw new Error(`Collection '${collectionName}' not found`);
+    }
+
+    // Ensure the field has the correct format
+    const fieldWithId = {
+      id: field.id || `field_${field.name}_${Date.now()}`,
+      name: field.name,
+      type: field.type,
+      required: field.required || false,
+      unique: field.unique || false,
+      options: field.options || {},
+    };
+
+    // Add the field to the schema
+    collection.schema.push(fieldWithId);
+
+    // Update the collection
     await this.pb.collections.update(collection.id, collection);
   }
 
@@ -182,7 +233,16 @@ export class PocketBaseClient {
     fieldName: string,
     payload: any,
   ): Promise<void> {
-    const collection = await this.pb.collections.getOne(collectionName);
+    // First, get the collection by name
+    const collections = await this.pb.collections.getFullList();
+    const collection = collections.find(
+      (col: any) => col.name === collectionName,
+    );
+
+    if (!collection) {
+      throw new Error(`Collection '${collectionName}' not found`);
+    }
+
     const fieldIndex = collection.schema.findIndex(
       (f: any) => f.name === fieldName,
     );

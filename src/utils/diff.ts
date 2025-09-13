@@ -109,8 +109,10 @@ export class SchemaDiff {
     let hasChanges = false;
 
     for (const ruleType of ruleTypes) {
-      const desiredRule = desired[ruleType];
-      const currentRule = current?.[ruleType];
+      // Normalize: treat '' and null as equivalent (open access)
+      const normalize = (v: any) => (v === '' || v == null ? null : v);
+      const desiredRule = normalize(desired[ruleType]);
+      const currentRule = normalize(current?.[ruleType]);
 
       if (desiredRule !== currentRule) {
         hasChanges = true;
@@ -242,32 +244,33 @@ export class SchemaDiff {
     }
 
     // Required changes can be unsafe
-    if (desired.required !== current.required) {
-      if (desired.required && !current.required) {
+    const desiredRequired = Boolean(desired.required);
+    const currentRequired = Boolean(current.required);
+    if (desiredRequired !== currentRequired) {
+      if (desiredRequired && !currentRequired) {
         // Making field required without default is unsafe
         isUnsafe = true;
         changes.push('required: false → true (no default value)');
       } else {
-        changes.push(`required: ${current.required} → ${desired.required}`);
+        changes.push(`required: ${currentRequired} → ${desiredRequired}`);
       }
     }
 
     // Unique changes can be unsafe
-    if (desired.unique !== current.unique) {
-      if (desired.unique && !current.unique) {
+    const desiredUnique = Boolean(desired.unique);
+    const currentUnique = Boolean(current.unique);
+    if (desiredUnique !== currentUnique) {
+      if (desiredUnique && !currentUnique) {
         // Making field unique is unsafe if data has duplicates
         isUnsafe = true;
         changes.push('unique: false → true (may have duplicates)');
       } else {
-        changes.push(`unique: ${current.unique} → ${desired.unique}`);
+        changes.push(`unique: ${currentUnique} → ${desiredUnique}`);
       }
     }
 
     // Options changes
-    const optionChanges = this.compareFieldOptions(
-      desired.options,
-      current.options,
-    );
+    const optionChanges = this.compareFieldOptions(desired.options, current.options);
     if (optionChanges.length > 0) {
       const hasUnsafeOptions = optionChanges.some(
         (change) => change.includes('tighten') || change.includes('reduce'),
@@ -304,35 +307,33 @@ export class SchemaDiff {
   private static compareFieldOptions(desired?: any, current?: any): string[] {
     const changes: string[] = [];
 
-    if (!desired && !current) return changes;
-    if (!desired || !current) {
-      changes.push('options: changed');
-      return changes;
+    // Treat missing/empty as equivalent unless desired explicitly provides values
+    const isEmpty = (obj: any) =>
+      obj == null || (typeof obj === 'object' && Object.keys(obj).length === 0);
+
+    if (isEmpty(desired) && isEmpty(current)) return changes;
+    if (isEmpty(desired) && !isEmpty(current)) return changes; // ignore default/no-op differences
+    if (!isEmpty(desired) && isEmpty(current)) {
+      // desired has options but current doesn't: only report when it actually restricts
+      // Let the detailed checks below add messages for specific keys
+      // No generic message here to avoid noise.
     }
 
     // Check for tightening constraints (unsafe)
-    if (
-      desired.min !== undefined &&
-      current.min !== undefined &&
-      desired.min > current.min
-    ) {
+    if (desired?.min !== undefined && current?.min !== undefined && desired.min > current.min) {
       changes.push(`min: ${current.min} → ${desired.min} (tighten)`);
     }
-    if (
-      desired.max !== undefined &&
-      current.max !== undefined &&
-      desired.max < current.max
-    ) {
+    if (desired?.max !== undefined && current?.max !== undefined && desired.max < current.max) {
       changes.push(`max: ${current.max} → ${desired.max} (tighten)`);
     }
 
     // Check for pattern changes
-    if (desired.pattern !== current.pattern) {
+    if (desired?.pattern !== undefined && current?.pattern !== undefined && desired.pattern !== current.pattern) {
       changes.push(`pattern: changed`);
     }
 
     // Check for select values changes
-    if (desired.values && current.values) {
+    if (desired?.values && current?.values) {
       const desiredValues = new Set(desired.values);
       const currentValues = new Set(current.values);
 

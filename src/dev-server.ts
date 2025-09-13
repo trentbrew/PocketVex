@@ -204,17 +204,27 @@ export class DevServer {
       console.log(chalk.gray(`\n📁 ${event}: ${relativePath}`));
     }
 
-    // Handle schema files
+    // Resolve configured directories once per call
+    const schemaDir = this.pocketVexConfig.getSchemaDirectory();
+    const jobsDir = this.pocketVexConfig.getJobsDirectory();
+    const hooksDir = this.pocketVexConfig.getHooksDirectory();
+    const commandsDir = this.pocketVexConfig.getCommandsDirectory();
+    const queriesDir = this.pocketVexConfig.getQueriesDirectory();
+
+    // Handle schema files (.ts or .js under schema directory)
     if (
-      filePath.includes('schema') &&
+      filePath.includes(schemaDir) &&
       (fileName.endsWith('.ts') || fileName.endsWith('.js'))
     ) {
       await this.handleSchemaChange(event, filePath);
+      return;
     }
 
-    // Handle JavaScript VM files
-    if (filePath.includes('pb_') || filePath.includes('javascript-vm')) {
+    // Handle JavaScript VM files (.js under jobs/hooks/commands/queries)
+    const jsVmDirs = [jobsDir, hooksDir, commandsDir, queriesDir];
+    if (fileName.endsWith('.js') && jsVmDirs.some((d) => filePath.includes(d))) {
       await this.handleJavaScriptVMChange(event, filePath);
+      return;
     }
   }
 
@@ -444,7 +454,16 @@ export class DevServer {
 
       // Apply safe changes automatically
       if (plan.safe.length > 0 && this.config.autoApply) {
+        console.log(
+          chalk.blue(`\n🔄 Applying ${plan.safe.length} safe changes...`),
+        );
         await this.applySafeChanges(plan.safe);
+      } else if (plan.safe.length > 0) {
+        console.log(
+          chalk.yellow(
+            `\n⚠️  ${plan.safe.length} safe changes available but auto-apply is disabled`,
+          ),
+        );
       }
 
       // Generate migration files for unsafe changes
@@ -478,18 +497,57 @@ export class DevServer {
     filePath: string,
     content: string,
   ): Promise<any> {
-    // This would parse the schema file and return the schema object
-    // For now, we'll use a simple approach
     try {
-      // Try to evaluate the file as a module
-      const module = await import(filePath);
+      // Convert the file path to an absolute path for import
+      const absolutePath = require.resolve(filePath);
+      const module = await import(absolutePath);
       return module.schema || module.default;
     } catch (error) {
-      throw new Error(
-        `Failed to parse schema file: ${
-          error instanceof Error ? error.message : 'Unknown error'
-        }`,
-      );
+      // Fallback: try to parse the content directly
+      try {
+        // Remove imports and TypeScript-specific syntax and eval the content
+        const jsContent = content
+          // strip ESM/CJS imports for eval fallback
+          .replace(/^\s*import[^\n]*\n/gm, '')
+          .replace(/^\s*export\s+\{[^}]*\}\s*;?\s*$/gm, '')
+          // normalize schema export
+          .replace(/export\s+const\s+schema\s*=\s*/, 'const schema = ')
+          .replace(/as\s+const/g, '')
+          .replace(/;\s*$/, '');
+
+        // Provide a minimal Rules helper prelude so schema can reference Rules without import
+        const prelude = [
+          "const __paren = (s) => '(' + s + ')';",
+          "const __join = (ops, op) => ops.filter(Boolean).map(s => __paren(String(s))).join(' ' + op + ' ');",
+          'const allow = {',
+          "  public: () => '1=1',",
+          "  deny: () => '1=2',",
+          "  auth: () => '@request.auth.id != \"\"',",
+          "  role: (name, field = 'role') => '@request.auth.' + field + ' = \"' + name + '\"',",
+          "  anyRole: (names, field = 'role') => __join(names.map(n => '@request.auth.' + field + ' = \"' + n + '\"'), '||'),",
+          "  owner: (field) => field + ' = @request.auth.id',",
+          "  relatedOwner: (relation, ownerField = 'author') => relation + '.' + ownerField + ' = @request.auth.id',",
+          "  published: (field = 'isPublished') => field + ' = true',",
+          "  and: (...rules) => __join(rules, '&&'),",
+          "  or: (...rules) => __join(rules, '||'),",
+          "  not: (rule) => (rule ? '!(' + rule + ')' : undefined),",
+          '};',
+          'const Rules = allow;',
+        ].join('\n');
+
+        // Create a safe evaluation context
+        const context = { schema: null };
+        const func = new Function('context', `${prelude}\n${jsContent}; context.schema = schema;`);
+        func(context);
+
+        return context.schema;
+      } catch (evalError) {
+        throw new Error(
+          `Failed to parse schema file: ${
+            error instanceof Error ? error.message : 'Unknown error'
+          }`,
+        );
+      }
     }
   }
 
@@ -509,7 +567,7 @@ export class DevServer {
     }
 
     if (plan.unsafe.length > 0) {
-      console.log(chalk.gray('\n  Unsafe changes:'));
+      console.log(chalk.gray('\n  Unsafe changes (NOT APPLIED):'));
       plan.unsafe.forEach((op: any, i: number) => {
         console.log(chalk.yellow(`    ${i + 1}. ${op.summary}`));
         if (op.requiresDataMigration) {
@@ -523,17 +581,56 @@ export class DevServer {
    * Apply safe changes automatically
    */
   private async applySafeChanges(safeOperations: any[]): Promise<void> {
-    if (safeOperations.length === 0) return;
+    if (safeOperations.length === 0) {
+      console.log(chalk.gray('No safe operations to apply'));
+      return;
+    }
 
+    console.log(
+      chalk.blue(
+        `\n🔧 Starting to apply ${safeOperations.length} safe operations...`,
+      ),
+    );
     const applySpinner = ora('Applying safe changes...').start();
 
     try {
-      for (const operation of safeOperations) {
-        // In a real implementation, this would apply the operation to PocketBase
-        console.log(chalk.green(`  ✅ Applied: ${operation.summary}`));
+      let successCount = 0;
+      let failureCount = 0;
+
+      for (let i = 0; i < safeOperations.length; i++) {
+        const operation = safeOperations[i];
+        try {
+          console.log(chalk.gray(`  🔄 Applying: ${operation.summary}`));
+          await this.client.applyOperation(operation);
+          console.log(chalk.green(`  ✅ Applied: ${operation.summary}`));
+          successCount++;
+        } catch (error) {
+          console.log(chalk.red(`  ❌ Failed: ${operation.summary}`));
+          console.log(
+            chalk.gray(
+              `     Error: ${
+                error instanceof Error ? error.message : 'Unknown error'
+              }`,
+            ),
+          );
+          failureCount++;
+        }
+
+        // Small delay between operations to avoid server rate limits
+        if (i < safeOperations.length - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 250));
+        }
       }
 
-      applySpinner.succeed(`Applied ${safeOperations.length} safe changes`);
+      if (failureCount === 0) {
+        applySpinner.succeed(
+          `Successfully applied ${successCount} safe changes`,
+        );
+      } else {
+        applySpinner.warn(
+          `Applied ${successCount} changes, ${failureCount} failed`,
+        );
+      }
     } catch (error) {
       applySpinner.fail('Failed to apply safe changes');
       throw error;

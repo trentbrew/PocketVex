@@ -15,10 +15,9 @@ export type {
   DevServerConfig,
 } from './types/schema.js';
 
-// Export core classes
+// Export core utilities
 export { SchemaDiff } from './utils/diff.js';
-export { PocketBaseClient } from './utils/pocketbase.js';
-export { DevServer } from './dev-server.js';
+export { allow as Rules, pb as PBRules } from './utils/rules.js';
 
 // Note: CLI utilities are available via the main CLI interface
 // Use 'pocketvex migrate' and 'pocketvex schema apply' commands

@@ -21,11 +21,11 @@
       "types": "./dist/types/pocketbase-js.d.ts"
     },
     "./cli": {
-      "import": "./dist/index.js"
+      "import": "./dist/cli/index.js"
     }
   },
   "scripts": {
-    "build": "bun build src/lib.ts --outdir dist --target node --format esm && bun build src/index.ts --outdir dist --target node --format esm && bunx tsc --project config/tsconfig.build.json --emitDeclarationOnly",
+    "build": "rm -rf dist && bun build src/lib.ts --outdir dist --target node --format esm && bun build src/index.ts --outdir dist/cli --target node --format esm && bun build src/types/pocketbase-js.ts --outdir dist/types --target node --format esm && node scripts/fix-shebang.mjs && bunx tsc --project config/tsconfig.build.json --emitDeclarationOnly",
     "prepublishOnly": "npm run build",
     "typecheck": "bunx tsc --project config/tsconfig.json --noEmit",
     "lint": "eslint src --ext .ts",
@@ -77,7 +77,7 @@
     "typescript": "^5"
   },
   "bin": {
-    "pocketvex": "./dist/index.js"
+    "pocketvex": "./dist/cli/index.js"
   },
   "keywords": [
     "pocketbase",
