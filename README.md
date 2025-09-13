@@ -345,8 +345,17 @@ export const schema = {
       type: 'base',
       schema: [
         { name: 'name', type: 'text', required: true } as SchemaFieldStrict,
-        { name: 'email', type: 'email', required: true, unique: true } as SchemaFieldStrict,
-        { name: 'role', type: 'select', options: { values: ['user', 'admin'] } } as SchemaFieldStrict,
+        {
+          name: 'email',
+          type: 'email',
+          required: true,
+          unique: true,
+        } as SchemaFieldStrict,
+        {
+          name: 'role',
+          type: 'select',
+          options: { values: ['user', 'admin'] },
+        } as SchemaFieldStrict,
       ] as SchemaFieldStrict[],
       rules: {
         list: "@request.auth.id != ''",
@@ -554,6 +563,181 @@ interface SchemaField {
     collectionId?: string;
     cascadeDelete?: boolean;
   };
+}
+
+interface SchemaRules {
+  list?: string;   // Who can list records
+  view?: string;   // Who can view individual records
+  create?: string; // Who can create records
+  update?: string; // Who can update records
+  delete?: string; // Who can delete records
+}
+```
+
+## 🔐 API Rules & Access Control
+
+PocketVex uses PocketBase's powerful rule system for access control. Rules are JavaScript expressions that determine who can perform specific operations on your collections.
+
+### Rule Operations
+
+- **`list`**: Controls who can fetch multiple records (GET `/api/collections/{collection}`)
+- **`view`**: Controls who can fetch a single record (GET `/api/collections/{collection}/{id}`)
+- **`create`**: Controls who can create new records (POST `/api/collections/{collection}`)
+- **`update`**: Controls who can update existing records (PATCH `/api/collections/{collection}/{id}`)
+- **`delete`**: Controls who can delete records (DELETE `/api/collections/{collection}/{id}`)
+
+### Rule Syntax
+
+Rules use PocketBase's expression syntax with access to:
+
+- **`@request.auth`**: Current authenticated user (null if not authenticated)
+- **`@request.data`**: Data being sent in the request
+- **`@request.query`**: Query parameters
+- **`@request.headers`**: HTTP headers
+- **`@request.method`**: HTTP method (GET, POST, etc.)
+- **`@request.info`**: Request metadata (IP, user agent, etc.)
+
+### Common Rule Patterns
+
+```typescript
+// Public access (anyone can read, only authenticated users can write)
+rules: {
+  list: "1=1",                    // Anyone can list
+  view: "1=1",                    // Anyone can view
+  create: "@request.auth.id != ''", // Only authenticated users
+  update: "@request.auth.id != ''", // Only authenticated users
+  delete: "@request.auth.id != ''", // Only authenticated users
+}
+
+// Owner-only access
+rules: {
+  list: "@request.auth.id != ''",           // Only authenticated users
+  view: "@request.auth.id != ''",           // Only authenticated users
+  create: "@request.auth.id != ''",         // Only authenticated users
+  update: "@request.auth.id = author",      // Only the record owner
+  delete: "@request.auth.id = author",      // Only the record owner
+}
+
+// Admin-only access
+rules: {
+  list: "@request.auth.role = 'admin'",     // Only admins
+  view: "@request.auth.role = 'admin'",     // Only admins
+  create: "@request.auth.role = 'admin'",   // Only admins
+  update: "@request.auth.role = 'admin'",   // Only admins
+  delete: "@request.auth.role = 'admin'",   // Only admins
+}
+
+// Mixed access (public read, owner write)
+rules: {
+  list: "1=1",                              // Anyone can list
+  view: "1=1",                              // Anyone can view
+  create: "@request.auth.id != ''",         // Only authenticated users
+  update: "@request.auth.id = author",      // Only the record owner
+  delete: "@request.auth.id = author",      // Only the record owner
+}
+
+// Complex conditions
+rules: {
+  list: "@request.auth.id != '' && (@request.auth.role = 'admin' || @request.auth.role = 'user')",
+  view: "@request.auth.id != ''",
+  create: "@request.auth.id != '' && @request.auth.role = 'admin'",
+  update: "@request.auth.id = author || @request.auth.role = 'admin'",
+  delete: "@request.auth.role = 'admin'",
+}
+```
+
+### Using the Rules Helper
+
+PocketVex provides a `Rules` helper for building complex rule expressions:
+
+```typescript
+import { Rules } from 'pocketvex';
+
+// Simple rules
+const publicRead = Rules.public();                    // "1=1"
+const authenticatedOnly = Rules.authenticated();      // "@request.auth.id != ''"
+const adminOnly = Rules.role('admin');               // "@request.auth.role = 'admin'"
+
+// Complex rules
+const ownerOrAdmin = Rules.or(
+  Rules.owner('author'),                              // "@request.auth.id = author"
+  Rules.role('admin')                                 // "@request.auth.role = 'admin'"
+);
+
+const authenticatedUser = Rules.and(
+  Rules.authenticated(),                              // "@request.auth.id != ''"
+  Rules.or(
+    Rules.role('user'),                               // "@request.auth.role = 'user'"
+    Rules.role('admin')                               // "@request.auth.role = 'admin'"
+  )
+);
+
+// Use in schema
+export const schema = {
+  collections: [
+    {
+      name: 'posts',
+      type: 'base',
+      schema: [
+        { name: 'title', type: 'text', required: true },
+        { name: 'content', type: 'editor' },
+        { name: 'author', type: 'relation', options: { collectionId: 'users' } },
+      ],
+      rules: {
+        list: publicRead,                              // Anyone can list
+        view: publicRead,                              // Anyone can view
+        create: authenticatedOnly,                     // Only authenticated users
+        update: ownerOrAdmin,                          // Owner or admin
+        delete: adminOnly,                             // Only admins
+      },
+    },
+  ],
+};
+```
+
+### Rule Examples by Use Case
+
+**Blog Posts**:
+```typescript
+rules: {
+  list: "1=1",                              // Public blog
+  view: "1=1",                              // Anyone can read posts
+  create: "@request.auth.role = 'author'",  // Only authors can create
+  update: "@request.auth.id = author",      // Only post author can edit
+  delete: "@request.auth.role = 'admin'",   // Only admins can delete
+}
+```
+
+**User Profiles**:
+```typescript
+rules: {
+  list: "@request.auth.id != ''",           // Only authenticated users
+  view: "@request.auth.id != ''",           // Only authenticated users
+  create: "@request.auth.id != ''",         // Users can create their profile
+  update: "@request.auth.id = id",          // Users can only edit their own
+  delete: "@request.auth.id = id",          // Users can delete their own
+}
+```
+
+**Admin-Only Collections**:
+```typescript
+rules: {
+  list: "@request.auth.role = 'admin'",     // Only admins
+  view: "@request.auth.role = 'admin'",     // Only admins
+  create: "@request.auth.role = 'admin'",   // Only admins
+  update: "@request.auth.role = 'admin'",   // Only admins
+  delete: "@request.auth.role = 'admin'",   // Only admins
+}
+```
+
+**Public API**:
+```typescript
+rules: {
+  list: "1=1",                              // Anyone can list
+  view: "1=1",                              // Anyone can view
+  create: "1=1",                            // Anyone can create
+  update: "1=1",                            // Anyone can update
+  delete: "1=1",                            // Anyone can delete
 }
 ```
 
@@ -903,7 +1087,7 @@ export interface PocketBaseAPI {
 1. **Define Schema**: Create TypeScript schema files
 2. **Add Business Logic**: Write event hooks in JavaScript
 3. **Create Automation**: Add scheduled jobs and console commands
-4. **Start Development Server**: `npx pocketvex dev`  *(repo-dev from source: `bun run dev-js`)*
+4. **Start Development Server**: `npx pocketvex dev` _(repo-dev from source: `bun run dev-js`)_
 5. **Real-time Sync**: Files are watched and synced automatically
 6. **Type Safety**: TypeScript types are generated from schema
 
