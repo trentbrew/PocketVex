@@ -41,19 +41,33 @@ export class DemoUtils {
    */
   static async selectHost(): Promise<string> {
     const cachedHosts = await credentialStore.getCachedHosts();
-    
+
     const choices = [
-      { name: '🌐 Live PocketBase (pocketvex.pockethost.io)', value: 'https://pocketvex.pockethost.io' },
-      { name: '🏠 Local PocketBase (127.0.0.1:8090)', value: 'http://127.0.0.1:8090' },
+      {
+        name: '🌐 Live PocketBase (pocketvex.pockethost.io)',
+        value: 'https://pocketvex.pockethost.io',
+      },
+      {
+        name: '🏠 Local PocketBase (127.0.0.1:8090)',
+        value: 'http://127.0.0.1:8090',
+      },
     ];
 
     // Add cached hosts if any exist
     if (cachedHosts.length > 0) {
-      choices.unshift({ name: '📋 Cached Hosts', value: 'cached', disabled: true });
-      cachedHosts.forEach(host => {
+      choices.unshift({
+        name: '📋 Cached Hosts',
+        value: 'cached',
+        disabled: true,
+      });
+      cachedHosts.forEach((host) => {
         choices.push({ name: `  💾 ${host}`, value: host });
       });
-      choices.push({ name: '───────────────', value: 'separator', disabled: true });
+      choices.push({
+        name: '───────────────',
+        value: 'separator',
+        disabled: true,
+      });
     }
 
     choices.push({ name: '✏️  Enter custom URL', value: 'custom' });
