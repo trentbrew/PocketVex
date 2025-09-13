@@ -65,17 +65,41 @@ export PB_ADMIN_PASS="admin123"
 
 ### 1. Setup & Configuration
 
-First, set up your PocketBase credentials:
+PocketVex provides an interactive setup experience that guides you through host selection and credential management:
 
 ```bash
 # Interactive setup (recommended for first-time users)
 bun run setup
 
-# Or pass credentials directly to commands
-bun run cli schema diff --url "http://127.0.0.1:8090" --email "admin@example.com" --password "admin123"
+# Or run any command - it will prompt for host selection
+bun run dev
 ```
 
-**🔐 Credential Caching:** PocketVex automatically caches your credentials securely for 24 hours, so you won't need to enter them repeatedly. Credentials are encrypted and stored locally in `~/.pocketvex/credentials.json`.
+**🏠 Host Selection:** When you run PocketVex commands, you'll be prompted to select a PocketBase host:
+- 🌐 **Live PocketBase** (pocketvex.pockethost.io)
+- 🏠 **Local PocketBase** (127.0.0.1:8090)  
+- 💾 **Cached Hosts** (previously used hosts)
+- ✏️ **Custom URL** (enter your own PocketBase URL)
+
+**🔐 Credential Caching:** PocketVex automatically caches your credentials securely for 24 hours per host, so you won't need to enter them repeatedly. Credentials are encrypted and stored locally in `~/.pocketvex/credentials.json`.
+
+#### Host Selection Workflow
+
+When you run PocketVex commands, you'll see an interactive host selection menu:
+
+```
+? Select PocketBase host:
+❯ 🌐 Live PocketBase (pocketvex.pockethost.io)
+  🏠 Local PocketBase (127.0.0.1:8090)
+  💾 https://my-pb.example.com
+  ✏️  Enter custom URL
+```
+
+**Features:**
+- **Cached Hosts**: Previously used hosts appear in the menu for quick access
+- **Custom URLs**: Enter any PocketBase URL with validation
+- **Credential Integration**: Credentials are automatically retrieved for cached hosts
+- **Secure Storage**: Host URLs and credentials are encrypted and cached locally
 
 #### Managing Cached Credentials
 
