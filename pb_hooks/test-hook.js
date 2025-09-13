@@ -12,7 +12,7 @@ $app.onRecordCreate('users', (e) => {
 });
 
 $app.onRecordCreate('posts', (e) => {
-  console.log('📝 New post created:', e.record.title);
+  console.log('📝 New post created!!!!!!!! :', e.record.title);
 
   // Example: Auto-generate a slug if not provided
   if (!e.record.slug) {

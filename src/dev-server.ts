@@ -289,7 +289,7 @@ export class DevServer {
   }
 
   /**
-   * Deploy a JavaScript file to PocketBase
+   * Handle JavaScript VM file changes (informational mode)
    */
   private async deployJavaScriptFile(filePath: string): Promise<void> {
     const fileName = basename(filePath);
@@ -312,57 +312,22 @@ export class DevServer {
       return;
     }
 
-    try {
-      // Read the file content
-      const fileContent = await readFile(filePath, 'utf8');
-
-      // Create a deployment script that will write the file to PocketBase
-      const deploymentScript = `
-// Auto-deployed from PocketVex: ${relativePath}
-// Deployed at: ${new Date().toISOString()}
-
-// Write the file to PocketBase filesystem
-const fs = require('fs');
-const path = require('path');
-
-try {
-  // Ensure the target directory exists
-  const targetPath = path.join('${targetDir}', '${fileName}');
-
-  // Write the file content
-  fs.writeFileSync(targetPath, \`${fileContent
-    .replace(/`/g, '\\`')
-    .replace(/\$/g, '\\$')}\`);
-
-  console.log('✅ Deployed JS VM file: ${fileName} to ${targetDir}/');
-} catch (error) {
-  console.error('❌ Failed to deploy JS VM file:', error);
-}
-`;
-
-      // Execute the deployment script through PocketBase's JavaScript VM
-      await this.client.executeJavaScript(deploymentScript);
-
-      console.log(chalk.green(`✅ Deployed: ${fileName} → ${targetDir}/`));
-    } catch (error) {
-      console.error(
-        chalk.red(
-          `❌ Failed to deploy ${fileName}: ${
-            error instanceof Error ? error.message : 'Unknown error'
-          }`,
-        ),
-      );
-    }
+    // For now, just log the file change and provide deployment instructions
+    console.log(chalk.blue(`📝 JS VM file ready: ${fileName}`));
+    console.log(chalk.gray(`   Directory: ${targetDir}/`));
+    console.log(chalk.gray(`   Path: ${relativePath}`));
+    console.log(chalk.gray(`   📋 To deploy: Copy this file to your PocketBase instance`));
+    console.log(chalk.gray(`   📖 See README.md for deployment instructions`));
   }
 
   /**
-   * Deploy all existing JavaScript VM files on startup
+   * Scan existing JavaScript VM files on startup
    */
   private async deployExistingJavaScriptFiles(): Promise<void> {
-    console.log(chalk.blue('\n🚀 Deploying existing JavaScript VM files...'));
+    console.log(chalk.blue('\n🔍 Scanning JavaScript VM files...'));
 
     const jsVmDirs = ['pb_jobs', 'pb_hooks', 'pb_commands', 'pb_queries'];
-    let deployedCount = 0;
+    let foundCount = 0;
 
     for (const dir of jsVmDirs) {
       const dirPath = join(process.cwd(), dir);
@@ -379,18 +344,8 @@ try {
 
             for (const file of jsFiles) {
               const filePath = join(dirPath, file);
-              try {
-                await this.deployJavaScriptFile(filePath);
-                deployedCount++;
-              } catch (error) {
-                console.log(
-                  chalk.yellow(
-                    `  ⚠️  Failed to deploy ${file}: ${
-                      error instanceof Error ? error.message : 'Unknown error'
-                    }`,
-                  ),
-                );
-              }
+              console.log(chalk.blue(`  📝 ${file} (ready for deployment)`));
+              foundCount++;
             }
           }
         } catch (error) {
@@ -399,17 +354,19 @@ try {
       }
     }
 
-    if (deployedCount > 0) {
+    if (foundCount > 0) {
       console.log(
-        chalk.green(`✅ Deployed ${deployedCount} JavaScript VM files`),
+        chalk.green(`✅ Found ${foundCount} JavaScript VM files`),
       );
+      console.log(chalk.gray('   📋 Files are ready for manual deployment to PocketBase'));
+      console.log(chalk.gray('   📖 See README.md for deployment instructions'));
     } else {
-      console.log(chalk.gray('ℹ️  No JavaScript VM files found to deploy'));
+      console.log(chalk.gray('ℹ️  No JavaScript VM files found'));
     }
   }
 
   /**
-   * Remove a JavaScript file from PocketBase
+   * Handle JavaScript VM file removal (informational mode)
    */
   private async removeJavaScriptFile(filePath: string): Promise<void> {
     const fileName = basename(filePath);
@@ -429,37 +386,10 @@ try {
       return;
     }
 
-    try {
-      const removalScript = `
-// Remove JS VM file: ${fileName}
-const fs = require('fs');
-const path = require('path');
-
-try {
-  const targetPath = path.join('${targetDir}', '${fileName}');
-
-  if (fs.existsSync(targetPath)) {
-    fs.unlinkSync(targetPath);
-    console.log('✅ Removed JS VM file: ${fileName} from ${targetDir}/');
-  } else {
-    console.log('ℹ️  File not found: ${fileName} in ${targetDir}/');
-  }
-} catch (error) {
-  console.error('❌ Failed to remove JS VM file:', error);
-}
-`;
-
-      await this.client.executeJavaScript(removalScript);
-      console.log(chalk.green(`✅ Removed: ${fileName} from ${targetDir}/`));
-    } catch (error) {
-      console.error(
-        chalk.red(
-          `❌ Failed to remove ${fileName}: ${
-            error instanceof Error ? error.message : 'Unknown error'
-          }`,
-        ),
-      );
-    }
+    console.log(chalk.yellow(`🗑️  JS VM file removed: ${fileName}`));
+    console.log(chalk.gray(`   Directory: ${targetDir}/`));
+    console.log(chalk.gray(`   Path: ${relativePath}`));
+    console.log(chalk.gray(`   📋 Remember to remove from your PocketBase instance`));
   }
 
   /**

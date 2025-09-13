@@ -270,25 +270,41 @@ export class PocketBaseClient {
   }
 
   /**
-   * Execute JavaScript code in PocketBase's JavaScript VM
+   * Deploy a JavaScript file to PocketBase's filesystem
    * This is used for deploying JavaScript VM files
    */
-  async executeJavaScript(code: string): Promise<any> {
+  async deployJavaScriptFile(fileName: string, content: string, directory: string): Promise<any> {
     try {
-      // Use PocketBase's console command API to execute JavaScript
-      const response = await this.pb.send('/api/console/exec', {
+      // Create a FormData object with the file content
+      const formData = new FormData();
+      const blob = new Blob([content], { type: 'application/javascript' });
+      formData.append('file', blob, fileName);
+
+      // Upload the file to PocketBase's filesystem
+      const response = await this.pb.send(`/api/files/${directory}/${fileName}`, {
         method: 'POST',
-        body: JSON.stringify({ code }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        body: formData,
       });
 
       return response;
     } catch (error) {
-      // If console API is not available, try alternative approach
-      // This might not work in all PocketBase versions
-      throw new Error(`Failed to execute JavaScript: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      // If file upload fails, try alternative approach
+      throw new Error(`Failed to deploy JavaScript file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Remove a JavaScript file from PocketBase's filesystem
+   */
+  async removeJavaScriptFile(fileName: string, directory: string): Promise<any> {
+    try {
+      const response = await this.pb.send(`/api/files/${directory}/${fileName}`, {
+        method: 'DELETE',
+      });
+
+      return response;
+    } catch (error) {
+      throw new Error(`Failed to remove JavaScript file: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 }

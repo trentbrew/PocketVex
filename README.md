@@ -76,8 +76,9 @@ bun run dev
 ```
 
 **🏠 Host Selection:** When you run PocketVex commands, you'll be prompted to select a PocketBase host:
+
 - 🌐 **Live PocketBase** (pocketvex.pockethost.io)
-- 🏠 **Local PocketBase** (127.0.0.1:8090)  
+- 🏠 **Local PocketBase** (127.0.0.1:8090)
 - 💾 **Cached Hosts** (previously used hosts)
 - ✏️ **Custom URL** (enter your own PocketBase URL)
 
@@ -96,6 +97,7 @@ When you run PocketVex commands, you'll see an interactive host selection menu:
 ```
 
 **Features:**
+
 - **Cached Hosts**: Previously used hosts appear in the menu for quick access
 - **Custom URLs**: Enter any PocketBase URL with validation
 - **Credential Integration**: Credentials are automatically retrieved for cached hosts
@@ -240,16 +242,37 @@ echo '$jobs.register("test", "*/60 * * * * *", () => console.log("Hello!"));' > 
 # ✅ Deployed: test.js → pb_jobs/
 ```
 
-**Initial Deployment:**
-When you start the dev server, PocketVex automatically deploys all existing JavaScript VM files:
+**File Monitoring:**
+When you start the dev server, PocketVex scans for JavaScript VM files:
 
 ```
-🚀 Deploying existing JavaScript VM files...
+🔍 Scanning JavaScript VM files...
   📁 Found 2 files in pb_jobs/
-✅ Deployed: basic-logging.js → pb_jobs/
-✅ Deployed: example-jobs.js → pb_jobs/
-✅ Deployed 2 JavaScript VM files
+  📝 basic-logging.js (ready for deployment)
+  📝 example-jobs.js (ready for deployment)
+✅ Found 2 JavaScript VM files
+   📋 Files are ready for manual deployment to PocketBase
+   📖 See README.md for deployment instructions
 ```
+
+**Manual Deployment:**
+JavaScript VM files need to be manually deployed to PocketBase:
+
+1. **Copy files to PocketBase instance:**
+   ```bash
+   # Copy CRON jobs
+   cp pb_jobs/*.js /path/to/pocketbase/pb_jobs/
+   
+   # Copy hooks
+   cp pb_hooks/*.js /path/to/pocketbase/pb_hooks/
+   
+   # Copy commands
+   cp pb_commands/*.js /path/to/pocketbase/pb_commands/
+   ```
+
+2. **Restart PocketBase** to load the new JavaScript files
+
+3. **Or use PocketBase Admin UI** to upload files directly
 
 ### 4. Live Demo with PocketBase Instance
 

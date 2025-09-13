@@ -17,7 +17,7 @@ export class AutoDeploymentDemo {
     DemoUtils.printSection('What This Demo Shows');
     console.log(
       chalk.gray(
-        'This demo demonstrates how PocketVex automatically deploys JavaScript VM files:',
+        'This demo demonstrates how PocketVex monitors JavaScript VM files:',
       ),
     );
     console.log(
@@ -25,22 +25,22 @@ export class AutoDeploymentDemo {
         '  • File watching in pb_jobs/, pb_hooks/, pb_commands/, pb_queries/',
       ),
     );
-    console.log(chalk.gray('  • Automatic deployment when files change'));
-    console.log(chalk.gray('  • Initial deployment of existing files'));
-    console.log(chalk.gray('  • Real-time updates without PocketBase restart'));
+    console.log(chalk.gray('  • File change notifications with deployment instructions'));
+    console.log(chalk.gray('  • Scanning of existing files on startup'));
+    console.log(chalk.gray('  • Manual deployment guidance'));
 
     DemoUtils.printSection('How It Works');
     console.log(chalk.gray('1. Start the dev server:'));
     console.log(chalk.blue('   bun run dev'));
     console.log(
       chalk.gray(
-        '2. PocketVex automatically scans for existing JavaScript VM files',
+        '2. PocketVex scans for existing JavaScript VM files',
       ),
     );
-    console.log(chalk.gray('3. Deploys all found files to PocketBase'));
+    console.log(chalk.gray('3. Shows deployment instructions for found files'));
     console.log(chalk.gray('4. Starts watching for file changes'));
     console.log(
-      chalk.gray("5. When you save a file, it's automatically deployed"),
+      chalk.gray("5. When you save a file, it shows deployment instructions"),
     );
 
     DemoUtils.printSection('Supported Directories');
@@ -68,7 +68,8 @@ export class AutoDeploymentDemo {
       ),
     );
     console.log(chalk.gray('   🔄 JS VM file change: test.js'));
-    console.log(chalk.gray('   ✅ Deployed: test.js → pb_jobs/'));
+    console.log(chalk.gray('   📝 JS VM file ready: test.js'));
+    console.log(chalk.gray('   📋 To deploy: Copy this file to your PocketBase instance'));
 
     console.log(chalk.gray('\n3. Edit a hook file:'));
     console.log(
@@ -77,35 +78,37 @@ export class AutoDeploymentDemo {
       ),
     );
     console.log(chalk.gray('   🔄 JS VM file change: user-hooks.js'));
-    console.log(chalk.gray('   ✅ Deployed: user-hooks.js → pb_hooks/'));
+    console.log(chalk.gray('   📝 JS VM file ready: user-hooks.js'));
+    console.log(chalk.gray('   📋 To deploy: Copy this file to your PocketBase instance'));
 
     DemoUtils.printSection('File Operations');
-    console.log(chalk.gray('PocketVex handles all file operations:'));
-    console.log(chalk.gray('  • Add: New files are automatically deployed'));
-    console.log(chalk.gray('  • Change: Modified files are redeployed'));
+    console.log(chalk.gray('PocketVex monitors all file operations:'));
+    console.log(chalk.gray('  • Add: New files are detected and deployment instructions shown'));
+    console.log(chalk.gray('  • Change: Modified files show updated deployment instructions'));
     console.log(
-      chalk.gray('  • Delete: Removed files are cleaned up from PocketBase'),
+      chalk.gray('  • Delete: Removed files show cleanup reminders'),
     );
 
-    DemoUtils.printSection('Error Handling');
+    DemoUtils.printSection('Manual Deployment');
     console.log(
-      chalk.gray("If deployment fails, you'll see clear error messages:"),
+      chalk.gray("JavaScript VM files require manual deployment:"),
     );
     console.log(
-      chalk.red('   ❌ Failed to deploy test.js: Connection timeout'),
+      chalk.blue('   1. Copy files to PocketBase instance'),
     );
     console.log(
-      chalk.gray(
-        '   The dev server continues running and will retry on the next change.',
-      ),
+      chalk.blue('   2. Restart PocketBase to load new files'),
+    );
+    console.log(
+      chalk.blue('   3. Or use PocketBase Admin UI to upload'),
     );
 
     DemoUtils.printSection('Comparison with Convex');
-    console.log(chalk.gray('This provides the same experience as Convex:'));
+    console.log(chalk.gray('This provides similar monitoring to Convex:'));
     console.log(chalk.gray('  Convex: Edit files in /convex → Auto-deployed'));
     console.log(
       chalk.gray(
-        '  PocketVex: Edit files in pb_jobs/, pb_hooks/, etc. → Auto-deployed',
+        '  PocketVex: Edit files in pb_jobs/, pb_hooks/, etc. → Monitored with deployment guidance',
       ),
     );
 
@@ -118,8 +121,8 @@ export class AutoDeploymentDemo {
         '   echo \'console.log("Hello from PocketVex!");\' > pb_jobs/test.js',
       ),
     );
-    console.log(chalk.gray('3. Watch it get deployed automatically!'));
-    console.log(chalk.gray('4. Edit the file and see it redeploy'));
+    console.log(chalk.gray('3. Watch it get detected and see deployment instructions!'));
+    console.log(chalk.gray('4. Edit the file and see updated instructions'));
 
     DemoUtils.printDemoComplete('JavaScript VM auto-deployment');
   }
