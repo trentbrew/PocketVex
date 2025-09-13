@@ -571,6 +571,7 @@ export PB_ADMIN_PASS="secure_password"
 PocketVex includes comprehensive CRON job examples and demos for PocketBase's JavaScript VM scheduling capabilities:
 
 ### **Available CRON Patterns:**
+
 - **Every minute**: `0 * * * * *` - Session cleanup, real-time monitoring
 - **Every 5 minutes**: `0 */5 * * * *` - Email processing, task queues
 - **Every hour**: `0 0 * * * *` - Analytics generation, data aggregation
@@ -580,6 +581,7 @@ PocketVex includes comprehensive CRON job examples and demos for PocketBase's Ja
 - **High frequency**: `*/30 * * * * *` - Real-time task processing
 
 ### **CRON Job Examples:**
+
 ```bash
 # Run CRON jobs demo
 bun run demo:cron
@@ -590,6 +592,7 @@ bun run demo
 ```
 
 ### **Example CRON Jobs:**
+
 - **Session Cleanup**: Automatically remove expired user sessions
 - **Analytics Generation**: Create hourly/daily/weekly analytics reports
 - **Email Processing**: Process queued emails with error handling
@@ -599,6 +602,7 @@ bun run demo
 - **Weekly Reports**: Generate and send automated reports
 
 ### **Implementation:**
+
 1. Create JavaScript files in `pb_jobs/` directory
 2. Use `$jobs.register()` to define scheduled jobs
 3. Deploy to your PocketBase instance
@@ -607,10 +611,12 @@ bun run demo
 ```javascript
 // Example: Session cleanup every minute
 $jobs.register('session-cleanup', '0 * * * * *', async (cron) => {
-  const expiredSessions = await $app.db().newQuery('sessions')
+  const expiredSessions = await $app
+    .db()
+    .newQuery('sessions')
     .filter('expires < {:now}', { now: new Date() })
     .all();
-    
+
   for (const session of expiredSessions) {
     await $app.db().delete('sessions', session.id);
   }
