@@ -241,12 +241,12 @@ import type { User, Post } from '../../generated/types.js';
 
 export class PocketBaseClient extends PocketBase {
   constructor() {
-    const url = browser 
+    const url = browser
       ? (import.meta.env.VITE_POCKETBASE_URL || 'http://127.0.0.1:8090')
       : 'http://127.0.0.1:8090';
-    
+
     super(url);
-    
+
     // Enable real-time subscriptions
     this.autoCancellation(false);
   }
@@ -307,7 +307,7 @@ export class PocketBaseClient extends PocketBase {
       passwordConfirm: password,
       name
     });
-    
+
     // Auto-login after signup
     const authData = await this.collection('users').authWithPassword(email, password);
     return authData.record as User;
@@ -450,7 +450,7 @@ export const postsError = derived(postsStore, ($posts) => $posts.error);
 export const postsActions = {
   async loadPosts() {
     postsStore.update(state => ({ ...state, isLoading: true, error: null }));
-    
+
     try {
       const posts = await pb.getPosts();
       postsStore.update(state => ({
@@ -485,7 +485,7 @@ export const postsActions = {
       const updatedPost = await pb.updatePost(id, data);
       postsStore.update(state => ({
         ...state,
-        posts: state.posts.map(post => 
+        posts: state.posts.map(post =>
           post.id === id ? updatedPost : post
         )
       }));
@@ -524,23 +524,23 @@ export const postsActions = {
 
   async function handleSubmit() {
     if (!email || !password) return;
-    
+
     isLoading = true;
     error = '';
-    
+
     const result = await authActions.login(email, password);
-    
+
     if (!result.success) {
       error = result.error;
     }
-    
+
     isLoading = false;
   }
 </script>
 
 <div class="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
   <h2 class="text-2xl font-bold mb-6 text-center">Login</h2>
-  
+
   {#if error}
     <div class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
       {error}
@@ -557,7 +557,7 @@ export const postsActions = {
         disabled={isLoading}
       />
     </div>
-    
+
     <div class="mb-6">
       <Input
         type="password"
@@ -567,7 +567,7 @@ export const postsActions = {
         disabled={isLoading}
       />
     </div>
-    
+
     <Button
       type="submit"
       disabled={isLoading || !email || !password}
@@ -609,16 +609,16 @@ export const postsActions = {
       </Button>
     {/if}
   </div>
-  
+
   <div class="prose max-w-none mb-4">
     {@html post.content}
   </div>
-  
+
   <div class="flex justify-between items-center text-sm text-gray-500">
     <span>By {post.expand?.author?.name || 'Unknown'}</span>
     <span>{new Date(post.created).toLocaleDateString()}</span>
   </div>
-  
+
   {#if post.tags && post.tags.length > 0}
     <div class="mt-3 flex flex-wrap gap-2">
       {#each post.tags as tag}
@@ -652,7 +652,7 @@ export const postsActions = {
 <div class="container mx-auto px-4 py-8">
   <div class="flex justify-between items-center mb-8">
     <h1 class="text-3xl font-bold text-gray-900">Latest Posts</h1>
-    
+
     {#if $isAuthenticated}
       <Button href="/posts/create">
         Create Post
@@ -778,7 +778,7 @@ import type { User, Post } from '../../generated/types.js';
 <!-- Use generated types in Svelte components -->
 <script lang="ts">
   import type { Post } from '../../generated/types.js';
-  
+
   export let post: Post;
 </script>
 

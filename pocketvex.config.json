@@ -1,0 +1,11 @@
+{
+  "directory": "pocketvex",
+  "usePocketVexDirectory": true,
+  "usePbPrefixes": false,
+  "description": "PocketVex configuration file",
+  "options": {
+    "directory": "Directory where PocketVex files are located (relative to project root)",
+    "usePocketVexDirectory": "Whether to use the new /pocketvex structure",
+    "usePbPrefixes": "Whether to use pb_ prefixes (ignored when usePocketVexDirectory is true)"
+  }
+}

@@ -14,6 +14,7 @@ import { PocketBaseClient } from './utils/pocketbase.js';
 import { TypeGenerator } from './utils/type-generator.js';
 import { credentialStore } from './utils/credential-store.js';
 import { DemoUtils } from './utils/demo-utils.js';
+import { getPocketVexConfig } from './config/pocketvex-config.js';
 
 export interface DevServerConfig {
   url: string;
@@ -35,9 +36,11 @@ export class DevServer {
   private spinner: Ora;
   private isRunning: boolean = false;
   private lastSchemaHash: string = '';
+  private pocketVexConfig: ReturnType<typeof getPocketVexConfig>;
 
   constructor(config: DevServerConfig) {
     this.config = config;
+    this.pocketVexConfig = getPocketVexConfig();
     this.client = new PocketBaseClient({
       url: config.url,
       adminEmail: config.adminEmail,
@@ -297,14 +300,19 @@ export class DevServer {
 
     // Determine the target directory based on the file path
     let targetDir = '';
-    if (filePath.includes('pb_jobs/')) {
-      targetDir = 'pb_jobs';
-    } else if (filePath.includes('pb_hooks/')) {
-      targetDir = 'pb_hooks';
-    } else if (filePath.includes('pb_commands/')) {
-      targetDir = 'pb_commands';
-    } else if (filePath.includes('pb_queries/')) {
-      targetDir = 'pb_queries';
+    const jobsDir = this.pocketVexConfig.getJobsDirectory();
+    const hooksDir = this.pocketVexConfig.getHooksDirectory();
+    const commandsDir = this.pocketVexConfig.getCommandsDirectory();
+    const queriesDir = this.pocketVexConfig.getQueriesDirectory();
+
+    if (filePath.includes(jobsDir)) {
+      targetDir = 'jobs';
+    } else if (filePath.includes(hooksDir)) {
+      targetDir = 'hooks';
+    } else if (filePath.includes(commandsDir)) {
+      targetDir = 'commands';
+    } else if (filePath.includes(queriesDir)) {
+      targetDir = 'queries';
     } else {
       console.log(
         chalk.yellow(`⚠️  Unknown JS VM directory for: ${relativePath}`),
@@ -328,7 +336,12 @@ export class DevServer {
   private async deployExistingJavaScriptFiles(): Promise<void> {
     console.log(chalk.blue('\n🔍 Scanning JavaScript VM files...'));
 
-    const jsVmDirs = ['pb_jobs', 'pb_hooks', 'pb_commands', 'pb_queries'];
+    const jsVmDirs = [
+      this.pocketVexConfig.getJobsDirectory(),
+      this.pocketVexConfig.getHooksDirectory(),
+      this.pocketVexConfig.getCommandsDirectory(),
+      this.pocketVexConfig.getQueriesDirectory(),
+    ];
     let foundCount = 0;
 
     for (const dir of jsVmDirs) {
@@ -378,14 +391,19 @@ export class DevServer {
 
     // Determine the target directory
     let targetDir = '';
-    if (filePath.includes('pb_jobs/')) {
-      targetDir = 'pb_jobs';
-    } else if (filePath.includes('pb_hooks/')) {
-      targetDir = 'pb_hooks';
-    } else if (filePath.includes('pb_commands/')) {
-      targetDir = 'pb_commands';
-    } else if (filePath.includes('pb_queries/')) {
-      targetDir = 'pb_queries';
+    const jobsDir = this.pocketVexConfig.getJobsDirectory();
+    const hooksDir = this.pocketVexConfig.getHooksDirectory();
+    const commandsDir = this.pocketVexConfig.getCommandsDirectory();
+    const queriesDir = this.pocketVexConfig.getQueriesDirectory();
+
+    if (filePath.includes(jobsDir)) {
+      targetDir = 'jobs';
+    } else if (filePath.includes(hooksDir)) {
+      targetDir = 'hooks';
+    } else if (filePath.includes(commandsDir)) {
+      targetDir = 'commands';
+    } else if (filePath.includes(queriesDir)) {
+      targetDir = 'queries';
     } else {
       return;
     }
@@ -623,22 +641,15 @@ export async function startDevServer(
     config.url = await DemoUtils.selectHost();
   }
 
+  const pocketVexConfig = getPocketVexConfig();
   const defaultConfig: DevServerConfig = {
     url: 'http://127.0.0.1:8090',
     adminEmail: 'admin@example.com',
     adminPassword: 'admin123',
-    schemaDir: './schema',
-    migrationsDir: './pb_migrations',
-    generatedDir: './generated',
-    watchPatterns: [
-      './schema/**/*.ts',
-      './schema/**/*.js',
-      './pb_jobs/**/*.js',
-      './pb_hooks/**/*.js',
-      './pb_commands/**/*.js',
-      './pb_queries/**/*.js',
-      './examples/javascript-vm/**/*.js',
-    ],
+    schemaDir: pocketVexConfig.getSchemaDirectory(),
+    migrationsDir: pocketVexConfig.getMigrationsDirectory(),
+    generatedDir: pocketVexConfig.getGeneratedDirectory(),
+    watchPatterns: pocketVexConfig.getWatchPatterns(),
     autoApply: true,
     generateTypes: true,
     verbose: false,

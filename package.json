@@ -53,6 +53,7 @@
     "demo:host-selection": "bun run examples/host-selection-demo.ts",
     "demo:project-structure": "cat examples/project-structure/README.md",
     "demo:frontend-svelte": "cat examples/project-structure/frontend-svelte/README.md",
+    "demo:tree": "cat examples/project-structure/tree-diagram.md",
     "demo:test": "bun run examples/live-demo/test-connection.ts",
     "dev-js": "bun run src/dev-server-js.ts"
   },

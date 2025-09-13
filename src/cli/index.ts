@@ -14,6 +14,7 @@ import { TypeGenerator } from '../utils/type-generator.js';
 import { credentialStore } from '../utils/credential-store.js';
 import { startDevServer } from '../dev-server.js';
 import { schema as exampleSchema } from '../schema/example.js';
+import { getPocketVexConfig } from '../config/pocketvex-config.js';
 
 // Utility function to collect host and credentials
 async function collectHostAndCredentials(
@@ -100,6 +101,30 @@ program
   .name('pocketvex')
   .description('PocketVex - Schema-as-Code for PocketBase')
   .version('1.0.0');
+
+// Configuration command
+program
+  .command('config')
+  .description('Show current PocketVex configuration')
+  .action(() => {
+    const config = getPocketVexConfig();
+    const configData = config.getConfig();
+    
+    console.log(chalk.blue('📋 PocketVex Configuration:'));
+    console.log(chalk.gray('─────────────────────────'));
+    console.log(chalk.white(`Directory: ${chalk.green(configData.directory)}`));
+    console.log(chalk.white(`Use PocketVex Directory: ${chalk.green(configData.usePocketVexDirectory)}`));
+    console.log(chalk.white(`Use PB Prefixes: ${chalk.green(configData.usePbPrefixes)}`));
+    console.log(chalk.gray('─────────────────────────'));
+    console.log(chalk.blue('📁 Directory Structure:'));
+    console.log(chalk.gray(`Schema: ${config.getSchemaDirectory()}`));
+    console.log(chalk.gray(`Jobs: ${config.getJobsDirectory()}`));
+    console.log(chalk.gray(`Hooks: ${config.getHooksDirectory()}`));
+    console.log(chalk.gray(`Commands: ${config.getCommandsDirectory()}`));
+    console.log(chalk.gray(`Queries: ${config.getQueriesDirectory()}`));
+    console.log(chalk.gray(`Migrations: ${config.getMigrationsDirectory()}`));
+    console.log(chalk.gray(`Generated: ${config.getGeneratedDirectory()}`));
+  });
 
 // Global options
 program

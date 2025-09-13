@@ -10,23 +10,23 @@
 
   async function handleSubmit() {
     if (!email || !password) return;
-    
+
     isLoading = true;
     error = '';
-    
+
     const result = await authActions.login(email, password);
-    
+
     if (!result.success) {
       error = result.error;
     }
-    
+
     isLoading = false;
   }
 </script>
 
 <div class="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
   <h2 class="text-2xl font-bold mb-6 text-center">Login</h2>
-  
+
   {#if error}
     <div class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
       {error}
@@ -43,7 +43,7 @@
         disabled={isLoading}
       />
     </div>
-    
+
     <div class="mb-6">
       <Input
         type="password"
@@ -53,7 +53,7 @@
         disabled={isLoading}
       />
     </div>
-    
+
     <Button
       type="submit"
       disabled={isLoading || !email || !password}

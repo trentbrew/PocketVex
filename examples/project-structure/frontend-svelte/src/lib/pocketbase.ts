@@ -4,12 +4,12 @@ import type { User, Post } from '../../generated/types.js';
 
 export class PocketBaseClient extends PocketBase {
   constructor() {
-    const url = browser 
+    const url = browser
       ? (import.meta.env.VITE_POCKETBASE_URL || 'http://127.0.0.1:8090')
       : 'http://127.0.0.1:8090';
-    
+
     super(url);
-    
+
     // Enable real-time subscriptions
     this.autoCancellation(false);
   }
@@ -70,7 +70,7 @@ export class PocketBaseClient extends PocketBase {
       passwordConfirm: password,
       name
     });
-    
+
     // Auto-login after signup
     const authData = await this.collection('users').authWithPassword(email, password);
     return authData.record as User;
