@@ -63,9 +63,8 @@ export PB_ADMIN_PASS="admin123"
 # zero-install CLI
 npx pocketvex@latest help
 
-# init a sample project (scaffold schema, config, scripts)
-npx pocketvex@latest init my-app
-cd my-app
+# Start dev server - automatically creates project structure!
+npx pocketvex@latest dev
 
 # start dev watcher (safe ops auto-apply, types emit)
 npx pocketvex@latest dev
@@ -148,7 +147,7 @@ npx pocketvex util test-connection # Test PocketBase connection
 
 ### Start Development Server
 
-PocketVex includes a real-time development server similar to `npx convex dev`:
+PocketVex includes a real-time development server similar to `npx convex dev`. **The dev server automatically creates the project directory structure for you!**
 
 ```bash
 # Start dev server with file watching (default behavior)
@@ -157,6 +156,15 @@ npx pocketvex dev
 # One-time schema sync (no watching)
 npx pocketvex dev --once
 ```
+
+**🎉 Auto-Directory Creation**: When you run `npx pocketvex dev`, it automatically creates:
+- `pocketvex/schema/` - For your TypeScript schema files
+- `pocketvex/jobs/` - For CRON jobs and scheduled tasks
+- `pocketvex/hooks/` - For event hooks and middleware
+- `pocketvex/commands/` - For console commands
+- `pocketvex/queries/` - For custom queries
+- `pocketvex/migrations/` - For generated migration files
+- `generated/` - For auto-generated TypeScript types
 
 **🔄 Real-time Features:**
 
@@ -169,7 +177,7 @@ npx pocketvex dev --once
 
 #### Development Workflow
 
-1. **Start the dev server:**
+1. **Start the dev server (creates directories automatically):**
 
    ```bash
    npx pocketvex dev

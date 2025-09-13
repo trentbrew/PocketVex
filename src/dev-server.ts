@@ -75,6 +75,16 @@ export class DevServer {
         ),
       );
 
+      // Show project structure
+      console.log(chalk.blue('\n📁 Project Structure:'));
+      console.log(chalk.gray(`  Schema: ${this.pocketVexConfig.getSchemaDirectory()}`));
+      console.log(chalk.gray(`  Jobs: ${this.pocketVexConfig.getJobsDirectory()}`));
+      console.log(chalk.gray(`  Hooks: ${this.pocketVexConfig.getHooksDirectory()}`));
+      console.log(chalk.gray(`  Commands: ${this.pocketVexConfig.getCommandsDirectory()}`));
+      console.log(chalk.gray(`  Queries: ${this.pocketVexConfig.getQueriesDirectory()}`));
+      console.log(chalk.gray(`  Migrations: ${this.pocketVexConfig.getMigrationsDirectory()}`));
+      console.log(chalk.gray(`  Generated: ${this.pocketVexConfig.getGeneratedDirectory()}`));
+
       // Ensure directories exist
       await this.ensureDirectories();
 
@@ -147,21 +157,38 @@ export class DevServer {
    * Ensure required directories exist
    */
   private async ensureDirectories(): Promise<void> {
+    // Get all directories from the config system
+    const allDirs = this.pocketVexConfig.getAllDirectories();
+    
+    // Add the basic directories that might not be in getAllDirectories
     const dirs = [
+      ...allDirs,
       this.config.schemaDir,
       this.config.migrationsDir,
       this.config.generatedDir,
     ];
 
-    for (const dir of dirs) {
+    // Remove duplicates
+    const uniqueDirs = [...new Set(dirs)];
+
+    const createdDirs: string[] = [];
+    
+    for (const dir of uniqueDirs) {
       try {
         await access(dir);
       } catch {
         await mkdir(dir, { recursive: true });
-        if (this.config.verbose) {
-          console.log(chalk.gray(`Created directory: ${dir}`));
-        }
+        createdDirs.push(dir);
       }
+    }
+
+    // Show what was created
+    if (createdDirs.length > 0) {
+      console.log(chalk.blue('\n📁 Created project directories:'));
+      for (const dir of createdDirs) {
+        console.log(chalk.gray(`  ✓ ${dir}`));
+      }
+      console.log(chalk.gray('\nYou can now add your schema files and JavaScript VM files.'));
     }
   }
 
