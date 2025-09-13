@@ -158,6 +158,7 @@ npx pocketvex dev --once
 ```
 
 **🎉 Auto-Directory Creation**: When you run `npx pocketvex dev`, it automatically creates:
+
 - `pocketvex/schema/` - For your TypeScript schema files
 - `pocketvex/jobs/` - For CRON jobs and scheduled tasks
 - `pocketvex/hooks/` - For event hooks and middleware

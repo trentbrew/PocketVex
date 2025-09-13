@@ -77,13 +77,33 @@ export class DevServer {
 
       // Show project structure
       console.log(chalk.blue('\n📁 Project Structure:'));
-      console.log(chalk.gray(`  Schema: ${this.pocketVexConfig.getSchemaDirectory()}`));
-      console.log(chalk.gray(`  Jobs: ${this.pocketVexConfig.getJobsDirectory()}`));
-      console.log(chalk.gray(`  Hooks: ${this.pocketVexConfig.getHooksDirectory()}`));
-      console.log(chalk.gray(`  Commands: ${this.pocketVexConfig.getCommandsDirectory()}`));
-      console.log(chalk.gray(`  Queries: ${this.pocketVexConfig.getQueriesDirectory()}`));
-      console.log(chalk.gray(`  Migrations: ${this.pocketVexConfig.getMigrationsDirectory()}`));
-      console.log(chalk.gray(`  Generated: ${this.pocketVexConfig.getGeneratedDirectory()}`));
+      console.log(
+        chalk.gray(`  Schema: ${this.pocketVexConfig.getSchemaDirectory()}`),
+      );
+      console.log(
+        chalk.gray(`  Jobs: ${this.pocketVexConfig.getJobsDirectory()}`),
+      );
+      console.log(
+        chalk.gray(`  Hooks: ${this.pocketVexConfig.getHooksDirectory()}`),
+      );
+      console.log(
+        chalk.gray(
+          `  Commands: ${this.pocketVexConfig.getCommandsDirectory()}`,
+        ),
+      );
+      console.log(
+        chalk.gray(`  Queries: ${this.pocketVexConfig.getQueriesDirectory()}`),
+      );
+      console.log(
+        chalk.gray(
+          `  Migrations: ${this.pocketVexConfig.getMigrationsDirectory()}`,
+        ),
+      );
+      console.log(
+        chalk.gray(
+          `  Generated: ${this.pocketVexConfig.getGeneratedDirectory()}`,
+        ),
+      );
 
       // Ensure directories exist
       await this.ensureDirectories();
@@ -159,7 +179,7 @@ export class DevServer {
   private async ensureDirectories(): Promise<void> {
     // Get all directories from the config system
     const allDirs = this.pocketVexConfig.getAllDirectories();
-    
+
     // Add the basic directories that might not be in getAllDirectories
     const dirs = [
       ...allDirs,
@@ -172,7 +192,7 @@ export class DevServer {
     const uniqueDirs = [...new Set(dirs)];
 
     const createdDirs: string[] = [];
-    
+
     for (const dir of uniqueDirs) {
       try {
         await access(dir);
@@ -188,7 +208,11 @@ export class DevServer {
       for (const dir of createdDirs) {
         console.log(chalk.gray(`  ✓ ${dir}`));
       }
-      console.log(chalk.gray('\nYou can now add your schema files and JavaScript VM files.'));
+      console.log(
+        chalk.gray(
+          '\nYou can now add your schema files and JavaScript VM files.',
+        ),
+      );
     }
   }
 
@@ -249,7 +273,10 @@ export class DevServer {
 
     // Handle JavaScript VM files (.js under jobs/hooks/commands/queries)
     const jsVmDirs = [jobsDir, hooksDir, commandsDir, queriesDir];
-    if (fileName.endsWith('.js') && jsVmDirs.some((d) => filePath.includes(d))) {
+    if (
+      fileName.endsWith('.js') &&
+      jsVmDirs.some((d) => filePath.includes(d))
+    ) {
       await this.handleJavaScriptVMChange(event, filePath);
       return;
     }
@@ -549,7 +576,7 @@ export class DevServer {
           'const allow = {',
           "  public: () => '1=1',",
           "  deny: () => '1=2',",
-          "  auth: () => '@request.auth.id != \"\"',",
+          '  auth: () => \'@request.auth.id != ""\',',
           "  role: (name, field = 'role') => '@request.auth.' + field + ' = \"' + name + '\"',",
           "  anyRole: (names, field = 'role') => __join(names.map(n => '@request.auth.' + field + ' = \"' + n + '\"'), '||'),",
           "  owner: (field) => field + ' = @request.auth.id',",
@@ -564,7 +591,10 @@ export class DevServer {
 
         // Create a safe evaluation context
         const context = { schema: null };
-        const func = new Function('context', `${prelude}\n${jsContent}; context.schema = schema;`);
+        const func = new Function(
+          'context',
+          `${prelude}\n${jsContent}; context.schema = schema;`,
+        );
         func(context);
 
         return context.schema;
