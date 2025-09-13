@@ -49,6 +49,7 @@
     "demo:js-vm": "bun run examples/javascript-vm/js-features-demo.ts",
     "demo:cron": "bun run examples/javascript-vm/cron-demo.ts",
     "demo:basic-cron": "bun run examples/javascript-vm/basic-cron-demo.ts",
+    "demo:auto-deploy": "bun run examples/javascript-vm/auto-deployment-demo.ts",
     "demo:test": "bun run examples/live-demo/test-connection.ts",
     "dev-js": "bun run src/dev-server-js.ts"
   },

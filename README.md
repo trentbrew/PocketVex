@@ -190,18 +190,21 @@ bun run dev:once
 PocketVex automatically deploys JavaScript VM files to your PocketBase instance, just like Convex deploys files in the `/convex` folder:
 
 **Supported Directories:**
+
 - `./pb_jobs/` - CRON jobs and scheduled tasks
-- `./pb_hooks/` - Event hooks and middleware  
+- `./pb_hooks/` - Event hooks and middleware
 - `./pb_commands/` - Console commands
 - `./pb_queries/` - Custom queries and utilities
 
 **How it works:**
+
 1. **File Watching**: PocketVex watches all JavaScript files in these directories
 2. **Auto-Deployment**: When you save a file, it's automatically deployed to PocketBase
 3. **Hot Reload**: Changes take effect immediately without restarting PocketBase
 4. **Error Handling**: Failed deployments are logged with clear error messages
 
 **Example:**
+
 ```bash
 # Start the dev server
 bun run dev
@@ -215,6 +218,7 @@ echo '$jobs.register("test", "*/60 * * * * *", () => console.log("Hello!"));' > 
 
 **Initial Deployment:**
 When you start the dev server, PocketVex automatically deploys all existing JavaScript VM files:
+
 ```
 🚀 Deploying existing JavaScript VM files...
   📁 Found 2 files in pb_jobs/
