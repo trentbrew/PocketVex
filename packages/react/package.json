@@ -1,0 +1,42 @@
+{
+  "name": "@pocketvex/react",
+  "version": "1.0.0",
+  "description": "React hooks for PocketVex live state management",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "bun build src/index.ts --outdir dist --target node --format esm && bunx tsc --project ../../config/tsconfig.build.json --emitDeclarationOnly --outDir dist",
+    "dev": "bun build src/index.ts --outdir dist --target node --format esm --watch"
+  },
+  "dependencies": {
+    "@pocketvex/live-core": "workspace:*",
+    "react": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/node": "^20.10.0"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  },
+  "keywords": [
+    "pocketbase",
+    "react",
+    "hooks",
+    "realtime",
+    "state-management"
+  ],
+  "author": "Trent Brew",
+  "license": "MIT"
+}

@@ -116,5 +116,8 @@
   "homepage": "https://github.com/trentbrew/pocketvex#readme",
   "engines": {
     "node": ">=18.0.0"
-  }
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }

@@ -1,0 +1,36 @@
+{
+  "name": "@pocketvex/live-core",
+  "version": "1.0.0",
+  "description": "Framework-agnostic live state management for PocketBase",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "bun build src/index.ts --outdir dist --target node --format esm && bunx tsc --project ../../config/tsconfig.build.json --emitDeclarationOnly --outDir dist",
+    "dev": "bun build src/index.ts --outdir dist --target node --format esm --watch"
+  },
+  "dependencies": {
+    "pocketbase": "^0.21.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0"
+  },
+  "keywords": [
+    "pocketbase",
+    "realtime",
+    "state-management",
+    "framework-agnostic"
+  ],
+  "author": "Trent Brew",
+  "license": "MIT"
+}
