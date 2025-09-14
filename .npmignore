@@ -1,31 +1,16 @@
-# Source files
-src/
-schema/
-examples/
-pb_migrations/
-templates/
-memory/
-scripts/
+# Exclude node_modules from examples
+examples/*/node_modules/
+examples/*/dist/
+examples/*/.nuxt/
+examples/*/.svelte-kit/
+examples/*/.next/
+examples/*/build/
 
-# Development files
-demo.ts
-env.example
-.gitignore
-.vscode/
-.github/
+# Exclude lock files from examples
+examples/*/pnpm-lock.yaml
+examples/*/package-lock.json
+examples/*/yarn.lock
 
-# Build artifacts
-node_modules/
-*.log
-*.tgz
-
-# Development dependencies
-.eslintrc*
-tsconfig.json
-bun.lock
-
-# Test files
-test/
-tests/
-*.test.*
-*.spec.*
+# Exclude build artifacts
+examples/*/.vite/
+examples/*/.turbo/

@@ -1,6 +1,6 @@
 {
   "name": "pocketvex",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Schema migration system for PocketBase with real-time development workflow",
   "main": "dist/lib.js",
   "module": "dist/lib.js",
@@ -8,6 +8,7 @@
   "type": "module",
   "files": [
     "dist",
+    "examples",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
@@ -69,7 +70,10 @@
     "demo:frontend-svelte": "cat examples/project-structure/frontend-svelte/README.md",
     "demo:tree": "cat examples/project-structure/tree-diagram.md",
     "demo:test": "bun run examples/live-demo/test-connection.ts",
-    "dev-js": "bun run src/dev-server-js.ts"
+    "dev-js": "bun run src/dev-server-js.ts",
+    "demo:react": "cd examples/client-react && pnpm dev",
+    "demo:nuxt": "cd examples/client-nuxt && pnpm dev",
+    "demo:svelte": "cd examples/client-svelte && pnpm dev"
   },
   "sideEffects": false,
   "dependencies": {

@@ -137,6 +137,11 @@ npx pocketvex migrate status       # Show migration status
 # Development
 npx pocketvex dev                  # Start development server
 
+# Schema sync (Convex-like DX)
+npx pocketvex schema pull          # Remote -> local (writes pocketvex/schema/schema.js)
+npx pocketvex schema push          # Local  -> remote (apply diff)
+npx pocketvex schema sync          # Default remote wins (use --strategy local for local wins)
+
 # Interactive demos
 npx pocketvex demo                 # Run unified demo system
 # Tip: use `@latest` with npx if you want to bypass local cache (e.g., `npx pocketvex@latest demo`)
@@ -145,6 +150,7 @@ npx pocketvex demo                 # Run unified demo system
 npx pocketvex util setup           # Interactive setup for credentials
 npx pocketvex util credentials     # Manage cached credentials
 npx pocketvex util test-connection # Test PocketBase connection
+npx pocketvex init                 # Scaffold client pocketvex/ modules (records/auth)
 ```
 
 ### Start Development Server
@@ -225,6 +231,67 @@ PocketVex reports JavaScript VM files that are ready for deployment. For local/s
 - `./pb_hooks/` - Event hooks and middleware
 - `./pb_commands/` - Console commands
 - `./pb_queries/` - Custom queries and utilities
+
+### Client Apps: `pocketvex/` Modules
+
+For frontend clients (React, SvelteKit, Nuxt), organize PocketVex-related client code in a local `pocketvex/` directory inside the app. This is analogous to Convex’s client pattern and keeps queries/mutations/subscriptions together and typed. You can scaffold these files via `npx pocketvex init`. To mirror Convex’s DX, use `pocketvex schema pull|push|sync` to keep the local schema in `pocketvex/schema/` in continuous sync with your PocketBase instance (remote wins by default).
+
+Recommended layout per client app:
+
+- `pocketvex/records.ts` — Generic typed getters/setters for any collection
+- `pocketvex/posts.ts` — Optional specialization built on `records.ts` (for demos)
+- `pocketvex/index.ts` — Barrel exports (optional)
+- `src/lib/pb.ts` or `pocketvex/client.ts` — Client factory/singleton using PB URL from env
+- `pocketvex/pb-types.d.ts` — Generated types from PocketVex (see script)
+
+Env conventions by framework:
+
+- React (Next.js): `NEXT_PUBLIC_PB_URL`
+- SvelteKit (Vite): `VITE_PB_URL`
+- Nuxt: `NUXT_PUBLIC_PB_URL`
+
+Add a types generation script to each client:
+
+```
+"pv:types": "pocketvex types generate --output pocketvex/pb-types.d.ts"
+```
+
+Scaffold automatically:
+
+```
+# prompts for framework and writes files to src/pocketvex or pocketvex
+npx pocketvex init
+
+# non-interactive
+npx pocketvex init --framework react|sveltekit|nuxt|other
+```
+
+Minimal example generic `pocketvex/records.ts`:
+
+```ts
+import type PocketBase from 'pocketbase'
+
+export type ListParams = { page?: number; perPage?: number; filter?: string; sort?: string; expand?: string | string[] }
+
+export async function listRecords<T = any>(pb: PocketBase, collection: string, { page = 1, perPage = 50, ...rest }: ListParams = {}) {
+  return pb.collection(collection).getList<T>(page, perPage, rest as any)
+}
+
+export function subscribeToRecords<T = any>(pb: PocketBase, collection: string, topic: string | '*' = '*', handler: (e: { action: 'create' | 'update' | 'delete'; record: T }) => void) {
+  return pb.collection(collection).subscribe(topic as any, handler as any)
+}
+
+export async function createRecord<T = any>(pb: PocketBase, collection: string, data: Partial<T>) {
+  return pb.collection(collection).create<T>(data as any)
+}
+```
+
+See working examples in:
+
+- React: `examples/client-react/apps/web/pocketvex/`
+- SvelteKit: `examples/client-svelte/src/pocketvex/`
+- Nuxt: `examples/client-nuxt/pocketvex/`
+
 
 **How it works:**
 
