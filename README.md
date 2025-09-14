@@ -47,7 +47,7 @@ bun install
 npm install
 ```
 
-## ⚙️ Configuration
+## Configuration
 
 Set up your environment variables:
 
@@ -169,7 +169,7 @@ npx pocketvex dev --once
 - `pocketvex/migrations/` - For generated migration files
 - `generated/` - For auto-generated TypeScript types
 
-**🔄 Real-time Features:**
+**Real-time Features:**
 
 - **File Watching:** Automatically detects schema changes and JavaScript VM files
 - **Safe Changes:** Applied immediately to PocketBase
