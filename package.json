@@ -73,7 +73,8 @@
     "dev-js": "bun run src/dev-server-js.ts",
     "demo:react": "cd examples/client-react && pnpm dev",
     "demo:nuxt": "cd examples/client-nuxt && pnpm dev",
-    "demo:svelte": "cd examples/client-svelte && pnpm dev"
+    "demo:svelte": "cd examples/client-svelte && pnpm dev",
+    "demo:multi-tenant": "bun run examples/multi-tenant-demo.ts"
   },
   "sideEffects": false,
   "dependencies": {
