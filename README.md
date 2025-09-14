@@ -1,5 +1,7 @@
 <img width="50" height="50" alt="logo" src="https://github.com/user-attachments/assets/5a0edc4a-9071-4f40-a7ab-185b6cfcaff5" />
 
+# PocketVex
+
 **Schema migration system for PocketBase with real-time development workflow**
 
 PocketVex provides a Convex-style development experience for PocketBase, allowing you to define your schema as code and automatically apply changes during development.
