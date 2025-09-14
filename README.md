@@ -6,7 +6,7 @@
 
 PocketVex provides a Convex-style development experience for PocketBase, allowing you to define your schema as code and automatically apply changes during development.
 
-## 🚀 Features
+## Features
 
 - **Schema-as-Code**: Define your PocketBase schema in TypeScript
 - **Real-time Migration**: Watch schema files and apply changes automatically
@@ -23,7 +23,7 @@ PocketVex provides a Convex-style development experience for PocketBase, allowin
 - **Interactive Demos**: Comprehensive demo system for learning and testing
 - **Convex-like Experience**: Complete development workflow similar to Convex
 
-## 📦 Installation
+## Installation
 
 Use the Node-based CLI (no Bun required for end users). **Requires Node ≥ 18**.
 
@@ -57,7 +57,7 @@ export PB_ADMIN_EMAIL="admin@example.com"
 export PB_ADMIN_PASS="admin123"
 ```
 
-## 🎯 Quick Start
+## Quick Start
 
 ### Quickstart (Node CLI)
 
@@ -72,14 +72,14 @@ npx pocketvex@latest dev
 npx pocketvex@latest dev
 ```
 
-**🏠 Host Selection:** When you run PocketVex commands, you'll be prompted to select a PocketBase host:
+**Host Selection:** When you run PocketVex commands, you'll be prompted to select a PocketBase host:
 
-- 🌐 **Live PocketBase** (pocketvex.pockethost.io)
-- 🏠 **Local PocketBase** (127.0.0.1:8090)
-- 💾 **Cached Hosts** (previously used hosts)
-- ✏️ **Custom URL** (enter your own PocketBase URL)
+- **Live PocketBase** (pocketvex.pockethost.io)
+- **Local PocketBase** (127.0.0.1:8090)
+- **Cached Hosts** (previously used hosts)
+- ✏**Custom URL** (enter your own PocketBase URL)
 
-**🔐 Credential Caching:** PocketVex automatically caches your credentials securely for 24 hours per host, so you won't need to enter them repeatedly. Credentials are encrypted and stored locally in `~/.pocketvex/credentials.json`.
+**Credential Caching:** PocketVex automatically caches your credentials securely for 24 hours per host, so you won't need to enter them repeatedly. Credentials are encrypted and stored locally in `~/.pocketvex/credentials.json`.
 
 #### Host Selection Workflow
 
@@ -159,7 +159,7 @@ npx pocketvex dev
 npx pocketvex dev --once
 ```
 
-**🎉 Auto-Directory Creation**: When you run `npx pocketvex dev`, it automatically creates:
+**Auto-Directory Creation**: When you run `npx pocketvex dev`, it automatically creates:
 
 - `pocketvex/schema/` - For your TypeScript schema files
 - `pocketvex/jobs/` - For CRON jobs and scheduled tasks
@@ -461,7 +461,7 @@ pocketvex/
 └── README.md
 ```
 
-## 🔄 How It Works
+## How It Works
 
 ### Safe Operations (Auto-applied)
 
@@ -489,7 +489,7 @@ pocketvex/
 3. **Generate Migrations**: Unsafe changes generate migration files
 4. **Review & Deploy**: Review migrations before production deployment
 
-## 🔌 API Surface (current)
+## API Surface (current)
 
 PocketVex exports a small, stable surface today. More typed APIs are coming in the next minor (see roadmap).
 
@@ -532,7 +532,7 @@ Planned next‑minor additions (non‑breaking):
 - `pocketvex/client` → typed `PocketBaseClient` (auth, fetch/apply, plan exec)
 - `pocketvex/dev` → typed `DevServer` (watch, apply safe ops, emit types, VM mode)
 
-## 📝 Schema Definition
+## Schema Definition
 
 ```typescript
 interface SchemaDefinition {
@@ -586,7 +586,7 @@ interface SchemaRules {
 }
 ```
 
-## 🔐 API Rules & Access Control
+## API Rules & Access Control
 
 PocketVex uses PocketBase's powerful rule system for access control. Rules are JavaScript expressions that determine who can perform specific operations on your collections.
 
@@ -870,7 +870,7 @@ export PB_ADMIN_EMAIL="prod@example.com"
 export PB_ADMIN_PASS="secure_password"
 ```
 
-## 🚨 Safety Features
+## Safety Features
 
 - **Dry Run Mode**: Test migrations without applying them
 - **Backup Generation**: Automatic data backup before destructive changes
@@ -878,7 +878,7 @@ export PB_ADMIN_PASS="secure_password"
 - **Rollback Support**: Easy rollback of migrations
 - **Validation**: Comprehensive validation of schema changes
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -886,7 +886,7 @@ export PB_ADMIN_PASS="secure_password"
 4. Add tests
 5. Submit a pull request
 
-## ⏰ CRON Job Scheduling
+## CRON Job Scheduling
 
 PocketVex includes comprehensive CRON job examples and demos for PocketBase's JavaScript VM scheduling capabilities:
 
@@ -940,7 +940,7 @@ $jobs.register('session-cleanup', '0 * * * * *', async (cron) => {
 });
 ```
 
-## 🧩 PocketBase JavaScript VM Integration
+## PocketBase JavaScript VM Integration
 
 PocketVex provides comprehensive support for all PocketBase JavaScript features, making it truly Convex-like:
 
@@ -968,7 +968,7 @@ your-project/
     └── api-client.ts
 ```
 
-### 🎣 Event Hooks
+### Event Hooks
 
 Define custom business logic with event hooks:
 
@@ -998,7 +998,7 @@ $hooks.onRecordValidate((e) => {
 }, 'posts');
 ```
 
-### ⏰ Scheduled Jobs (CRON)
+### Scheduled Jobs (CRON)
 
 Create automated background tasks:
 
@@ -1046,7 +1046,7 @@ $commands.register({
 });
 ```
 
-### 🗄️ Raw Database Queries
+### Raw Database Queries
 
 Perform advanced database operations:
 
@@ -1069,7 +1069,7 @@ const getUserStats = async () => {
 };
 ```
 
-### 🔧 TypeScript Type Generation
+### TypeScript Type Generation
 
 Automatic type generation from your schema:
 
@@ -1104,7 +1104,7 @@ export interface PocketBaseAPI {
 }
 ```
 
-### 🚀 Development Workflow
+### Development Workflow
 
 1. **Define Schema**: Create TypeScript schema files
 2. **Add Business Logic**: Write event hooks in JavaScript
@@ -1128,11 +1128,11 @@ export interface PocketBaseAPI {
 
 This comprehensive integration makes PocketBase development as smooth and type-safe as Convex! 🎉
 
-## 📄 License
+## License
 
 MIT License - see LICENSE file for details
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Inspired by Convex's developer experience
 - Built for the PocketBase community
