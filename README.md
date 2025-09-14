@@ -1113,7 +1113,7 @@ export interface PocketBaseAPI {
 5. **Real-time Sync**: Files are watched and synced automatically
 6. **Type Safety**: TypeScript types are generated from schema
 
-### 📋 Available JavaScript VM APIs
+### Available JavaScript VM APIs
 
 - **`$app`** - Main application instance
 - **`$hooks`** - Event hook registration
