@@ -1,4 +1,4 @@
-<img width="500" height="500" alt="logo" src="https://github.com/user-attachments/assets/5a0edc4a-9071-4f40-a7ab-185b6cfcaff5" />
+<img width="50" height="50" alt="logo" src="https://github.com/user-attachments/assets/5a0edc4a-9071-4f40-a7ab-185b6cfcaff5" />
 
 **Schema migration system for PocketBase with real-time development workflow**
 
